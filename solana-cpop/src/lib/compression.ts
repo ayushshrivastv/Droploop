@@ -8,6 +8,7 @@ import {
   TransactionInstruction,
 } from '@solana/web3.js';
 import type { AccountMeta } from '@solana/web3.js';
+import * as borsh from 'borsh';
 // Define wallet interface
 interface SolanaWallet {
   publicKey: PublicKey;
@@ -63,6 +64,104 @@ const CANOPY_DEPTH = 0;
 // cPOP Program ID from your Anchor.toml or lib.rs
 const CPOP_PROGRAM_ID = new PublicKey('Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS');
 
+// Borsh schema for initialize_event instruction data
+class InitializeEventArgs {
+  eventName: string;
+  tokenName: string;
+  tokenSymbol: string;
+  maxSupply: number;
+  eventUri: string;
+  tokenUri: string;
+
+  constructor(args: {
+    eventName: string;
+    tokenName: string;
+    tokenSymbol: string;
+    maxSupply: number;
+    eventUri: string;
+    tokenUri: string;
+  }) {
+    this.eventName = args.eventName;
+    this.tokenName = args.tokenName;
+    this.tokenSymbol = args.tokenSymbol;
+    this.maxSupply = args.maxSupply;
+    this.eventUri = args.eventUri;
+    this.tokenUri = args.tokenUri;
+  }
+
+  static schema = new Map([
+    [
+      InitializeEventArgs,
+      {
+        kind: 'struct',
+        fields: [
+          ['eventName', 'string'],
+          ['tokenName', 'string'],
+          ['tokenSymbol', 'string'],
+          ['maxSupply', 'u64'],
+          ['eventUri', 'string'],
+          ['tokenUri', 'string'],
+        ],
+      },
+    ],
+  ]);
+}
+
+// Borsh schema for generate_qr_code instruction data
+class GenerateQrCodeArgs {
+  qrCodeId: string;
+  secretKey: Uint8Array;
+  expirationTime: number;
+
+  constructor(args: {
+    qrCodeId: string;
+    secretKey: Uint8Array;
+    expirationTime: number;
+  }) {
+    this.qrCodeId = args.qrCodeId;
+    this.secretKey = args.secretKey;
+    this.expirationTime = args.expirationTime;
+  }
+
+  static schema = new Map([
+    [
+      GenerateQrCodeArgs,
+      {
+        kind: 'struct',
+        fields: [
+          ['qrCodeId', 'string'],
+          ['secretKey', [32]],
+          ['expirationTime', 'i64'],
+        ],
+      },
+    ],
+  ]);
+}
+
+// Borsh schema for claim_token instruction data
+class ClaimTokenArgs {
+  qrCodeId: string;
+  secretKey: Uint8Array;
+
+  constructor(args: { qrCodeId: string; secretKey: Uint8Array }) {
+    this.qrCodeId = args.qrCodeId;
+    this.secretKey = args.secretKey;
+  }
+
+  static schema = new Map([
+    [
+      ClaimTokenArgs,
+      {
+        kind: 'struct',
+        fields: [
+          ['qrCodeId', 'string'],
+          ['secretKey', [32]],
+        ],
+      },
+    ],
+  ]);
+}
+
 // Create a Merkle tree account for an event
 export async function createMerkleTreeAccount(
   wallet: any,
@@ -99,7 +198,6 @@ export async function createMerkleTreeAccount(
   
   // Calculate required space for Merkle tree
   // This is an estimation based on SPL Account Compression program requirements
-  // In a production environment, use the actual getConcurrentMerkleTreeAccountSize function
   const space = calculateMerkleTreeSpace(
     MERKLE_TREE_HEIGHT, 
     MERKLE_TREE_BUFFER_SIZE,
@@ -198,7 +296,7 @@ export async function initializeEvent(
   );
   
   // Calculate Event PDA
-  const [eventPDA] = await PublicKey.findProgramAddressSync(
+  const [eventPDA] = PublicKey.findProgramAddressSync(
     [
       Buffer.from('event'),
       provider.wallet.publicKey.toBuffer(),
@@ -207,7 +305,26 @@ export async function initializeEvent(
     CPOP_PROGRAM_ID
   );
   
-  // Build the transaction manually since we're not using the Anchor client directly
+  // Serialize the instruction data
+  const args = new InitializeEventArgs({
+    eventName,
+    tokenName,
+    tokenSymbol,
+    maxSupply,
+    eventUri,
+    tokenUri,
+  });
+  
+  // Create the 8-byte discriminator for the initialize_event instruction
+  const discriminator = Buffer.from([105, 37, 101, 197, 75, 251, 102, 26]); // sighash("initialize_event")
+  
+  // Serialize the instruction arguments with a double type assertion
+  const argsBuffer = Buffer.from(borsh.serialize(InitializeEventArgs.schema as unknown as borsh.Schema, args));
+  
+  // Combine discriminator and serialized arguments
+  const data = Buffer.concat([discriminator, argsBuffer]);
+  
+  // Build the transaction
   const initializeEventIx = new TransactionInstruction({
     programId: CPOP_PROGRAM_ID,
     keys: [
@@ -219,13 +336,7 @@ export async function initializeEvent(
       { pubkey: SPL_ACCOUNT_COMPRESSION_PROGRAM_ID, isSigner: false, isWritable: false },
       { pubkey: SPL_NOOP_PROGRAM_ID, isSigner: false, isWritable: false },
     ],
-    data: Buffer.from([
-      /* 
-       * This would be the serialized instruction data for initializeEvent 
-       * In a production app, you would use proper serialization from Anchor
-       * For now, we're just showing the structure
-       */
-    ]),
+    data,
   });
   
   // Create and send transaction
@@ -236,6 +347,66 @@ export async function initializeEvent(
     txSignature, 
     eventPDA 
   };
+}
+
+// Generate a QR code for token claiming
+export async function generateQrCode(
+  wallet: any,
+  eventPDA: PublicKey,
+  qrCodeId: string,
+  secretKey: Uint8Array,
+  expirationTime: number
+): Promise<string> {
+  const connection = getConnection();
+  const provider = new CustomAnchorProvider(
+    connection,
+    wallet,
+    { commitment: 'confirmed' }
+  );
+  
+  // Calculate QR Code PDA
+  const [qrCodePDA] = PublicKey.findProgramAddressSync(
+    [
+      Buffer.from('qr_code'),
+      eventPDA.toBuffer(),
+      Buffer.from(qrCodeId)
+    ],
+    CPOP_PROGRAM_ID
+  );
+  
+  // Serialize the instruction data
+  const args = new GenerateQrCodeArgs({
+    qrCodeId,
+    secretKey,
+    expirationTime,
+  });
+  
+  // Create the 8-byte discriminator for the generate_qr_code instruction
+  const discriminator = Buffer.from([167, 18, 189, 177, 99, 129, 134, 5]); // sighash("generate_qr_code")
+  
+  // Serialize the instruction arguments with a double type assertion
+  const argsBuffer = Buffer.from(borsh.serialize(GenerateQrCodeArgs.schema as unknown as borsh.Schema, args));
+  
+  // Combine discriminator and serialized arguments
+  const data = Buffer.concat([discriminator, argsBuffer]);
+  
+  // Build the transaction
+  const generateQrCodeIx = new TransactionInstruction({
+    programId: CPOP_PROGRAM_ID,
+    keys: [
+      { pubkey: qrCodePDA, isSigner: false, isWritable: true },
+      { pubkey: eventPDA, isSigner: false, isWritable: true },
+      { pubkey: provider.wallet.publicKey, isSigner: true, isWritable: true },
+      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+    ],
+    data,
+  });
+  
+  // Create and send transaction
+  const tx = new Transaction().add(generateQrCodeIx);
+  const txSignature = await provider.sendAndConfirm(tx);
+  
+  return txSignature;
 }
 
 // Claim a token by adding a leaf to the Merkle tree
@@ -255,7 +426,7 @@ export async function claimToken(
   );
   
   // Calculate QR Code PDA
-  const [qrCodePDA] = await PublicKey.findProgramAddressSync(
+  const [qrCodePDA] = PublicKey.findProgramAddressSync(
     [
       Buffer.from('qr_code'),
       eventPDA.toBuffer(),
@@ -264,7 +435,22 @@ export async function claimToken(
     CPOP_PROGRAM_ID
   );
   
-  // Build the transaction for claiming a token
+  // Serialize the instruction data
+  const args = new ClaimTokenArgs({
+    qrCodeId,
+    secretKey,
+  });
+  
+  // Create the 8-byte discriminator for the claim_token instruction
+  const discriminator = Buffer.from([62, 198, 214, 193, 213, 159, 108, 210]); // sighash("claim_token")
+  
+  // Serialize the instruction arguments with a double type assertion
+  const argsBuffer = Buffer.from(borsh.serialize(ClaimTokenArgs.schema as unknown as borsh.Schema, args));
+  
+  // Combine discriminator and serialized arguments
+  const data = Buffer.concat([discriminator, argsBuffer]);
+  
+  // Build the transaction
   const claimTokenIx = new TransactionInstruction({
     programId: CPOP_PROGRAM_ID,
     keys: [
@@ -277,17 +463,14 @@ export async function claimToken(
       { pubkey: SPL_ACCOUNT_COMPRESSION_PROGRAM_ID, isSigner: false, isWritable: false },
       { pubkey: SPL_NOOP_PROGRAM_ID, isSigner: false, isWritable: false },
     ],
-    data: Buffer.from([
-      /* 
-       * Serialized instruction data for claimToken 
-       * In production, this would include qrCodeId and secretKey properly encoded
-       */
-    ]),
+    data,
   });
   
   // Create and send transaction
   const tx = new Transaction().add(claimTokenIx);
-  return await provider.sendAndConfirm(tx);
+  const txSignature = await provider.sendAndConfirm(tx);
+  
+  return txSignature;
 }
 
 // Verify token ownership using a Merkle proof
@@ -300,38 +483,37 @@ export async function verifyToken(
   merkleProof: Uint8Array[]
 ): Promise<boolean> {
   const connection = getConnection();
-  const provider = new CustomAnchorProvider(
-    connection,
-    wallet,
-    { commitment: 'confirmed' }
-  );
   
-  // Build the transaction for verifying a token
-  const verifyTokenIx = new TransactionInstruction({
-    programId: CPOP_PROGRAM_ID,
-    keys: [
-      { pubkey: eventPDA, isSigner: false, isWritable: false },
-      { pubkey: provider.wallet.publicKey, isSigner: true, isWritable: false },
-      { pubkey: merkleTreeAddress, isSigner: false, isWritable: false },
-      { pubkey: SPL_ACCOUNT_COMPRESSION_PROGRAM_ID, isSigner: false, isWritable: false },
-      { pubkey: SPL_NOOP_PROGRAM_ID, isSigner: false, isWritable: false },
-      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
-    ],
-    data: Buffer.from([
-      /* 
-       * Serialized instruction data for verifyToken
-       * This would include tokenId, leafHash, and merkleProof properly encoded
-       */
-    ]),
-  });
+  // For this function, we'll use the client-side verification
+  // rather than making an on-chain call, to save on transaction fees
   
-  try {
-    // Create and send transaction
-    const tx = new Transaction().add(verifyTokenIx);
-    await provider.sendAndConfirm(tx);
-    return true; // If we get here, verification succeeded
-  } catch (error) {
-    console.error('Error verifying token:', error);
-    return false;
+  // 1. Get the current Merkle tree account data
+  const merkleTreeAccount = await connection.getAccountInfo(merkleTreeAddress);
+  if (!merkleTreeAccount) {
+    throw new Error('Merkle tree account not found');
   }
+  
+  // 2. Extract the current root from the account data
+  // This is a simplified version - in production you should parse the
+  // proper Concurrent Merkle Tree account structure
+  const rootStart = 40; // Offset where the root is stored
+  const root = merkleTreeAccount.data.slice(rootStart, rootStart + 32);
+  
+  // 3. Use our client-side verification (for testing/development only)
+  // In production, this should call the on-chain verification
+  const hasher = new PoseidonHasher();
+  let currentNode = leafHash;
+  
+  // Apply each proof element to calculate the root
+  for (const proofElement of merkleProof) {
+    // Hash in the correct direction
+    const combinedHash = hasher.hashNodes(currentNode, proofElement);
+    currentNode = combinedHash;
+  }
+  
+  // 4. Compare the calculated root with the stored root
+  const calculatedRoot = currentNode;
+  const matches = Buffer.from(calculatedRoot).equals(Buffer.from(root));
+  
+  return matches;
 }

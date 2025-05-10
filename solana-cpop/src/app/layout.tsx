@@ -1,6 +1,8 @@
 import "@/styles/globals.css";
 
 import { Inter } from "next/font/google";
+import { WalletContextProvider } from "@/components/solana/wallet-provider";
+import React from "react";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -8,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "Solana cPOP - Proof of Participation",
+  title: "Droploop - Compressed Tokens on Solana",
   description: "A compressed token (cToken) Proof-of-Participation interface using ZK Compression on Solana.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
@@ -20,22 +22,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`font-sans ${inter.variable}`}>
-        <div className="min-h-screen bg-background flex flex-col">
-          <header className="border-b">
-            <div className="container mx-auto px-4 py-4">
-              <h1 className="font-bold text-xl">cPOP</h1>
+      <body className={`font-sans ${inter.variable} bg-black text-white`}>
+        <WalletContextProvider>
+          <div className="min-h-screen flex flex-col">
+            {/* Header is imported in each page to allow client-side functionality */}
+            <div className="pt-16"> {/* This padding accounts for the fixed header height */}
+              <main className="flex-1">
+                {children}
+              </main>
             </div>
-          </header>
-          <main className="flex-1 container mx-auto px-4 py-8">
-            {children}
-          </main>
-          <footer className="py-6 border-t">
-            <div className="container mx-auto px-4 text-center text-muted-foreground">
-              <p>© {new Date().getFullYear()} Solana cPOP - Built with ZK Compression</p>
+            {/* Footer component is imported here */}
+            <div>
+              {/* Footer will be added in page components */}
             </div>
-          </footer>
-        </div>
+          </div>
+        </WalletContextProvider>
       </body>
     </html>
   );

@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import { events, qrCodes } from "@/server/db/schema";
-import { eq, and, isNull } from "drizzle-orm";
+import { events, qrCodes, claimedTokens } from "@/server/db/schema";
+import { eq, and, isNull, sql } from "drizzle-orm";
 import { randomBytes } from "crypto";
 import { Connection, Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
 import {
@@ -18,6 +18,7 @@ import {
   EventInput,
   QrCodeInput
 } from "@/utils/schema-adapters";
+import { createLeafHash } from "@/lib/compression";
 
 // Constants for the Merkle tree
 const MERKLE_TREE_HEIGHT = 20;
@@ -36,7 +37,7 @@ const createEventSchema = z.object({
 
 // Validation schema for generating QR codes
 const generateQrCodeSchema = z.object({
-  eventId: z.string(),
+  eventId: z.string().uuid(),
   expirationTime: z.number().int().optional(),
 });
 
@@ -44,6 +45,19 @@ const generateQrCodeSchema = z.object({
 const claimTokenSchema = z.object({
   qrCodeId: z.string(),
   secretKey: z.string(),
+});
+
+// Validation schema for updating on-chain info
+const updateEventOnChainInfoSchema = z.object({
+  eventId: z.string().uuid(),
+  merkleTreeAddress: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/, "Invalid Solana address format"),
+  transactionSignature: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{87,88}$/, "Invalid transaction signature format"),
+});
+
+// Validation schema for token verification
+const verifyTokenSchema = z.object({
+  eventId: z.string().uuid(),
+  tokenId: z.number().int().positive(),
 });
 
 export const eventRouter = createTRPCRouter({
@@ -62,6 +76,23 @@ export const eventRouter = createTRPCRouter({
 
         const creatorWallet = (ctx.session.user as any).walletAddress;
 
+        // Check for max events per user (optional limit)
+        const eventsCountResult = await ctx.db.select({
+          count: sql`count(*)`.mapWith(Number),
+        })
+        .from(events)
+        .where(eq(events.creatorId, ctx.session.user.id));
+        
+        const userEventCount = eventsCountResult[0]?.count || 0;
+
+        const MAX_EVENTS_PER_USER = 10; // This could be environment config
+        if (userEventCount >= MAX_EVENTS_PER_USER) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: `You have reached the maximum limit of ${MAX_EVENTS_PER_USER} events`,
+          });
+        }
+
         // Create a database entry for the event using our adapter to convert field names
         const eventData = {
           creatorId: ctx.session.user.id,
@@ -73,7 +104,8 @@ export const eventRouter = createTRPCRouter({
           isActive: true,
           eventUri: input.eventUri,
           tokenUri: input.tokenUri,
-          merkleRoot: "" // Initial empty merkle root
+          merkleRoot: "", // Initial empty merkle root
+          claimedCount: 0,
         };
         
         // Convert to database fields with snake_case
@@ -87,6 +119,9 @@ export const eventRouter = createTRPCRouter({
         };
       } catch (error) {
         console.error("Error creating event:", error);
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create event",
@@ -115,7 +150,7 @@ export const eventRouter = createTRPCRouter({
 
   // Get a specific event by ID
   getEvent: publicProcedure
-    .input(z.object({ eventId: z.string() }))
+    .input(z.object({ eventId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       try {
         const event = await ctx.db.query.events.findFirst({
@@ -144,11 +179,7 @@ export const eventRouter = createTRPCRouter({
 
   // Update event's on-chain information after initialization
   updateEventOnChainInfo: protectedProcedure
-    .input(z.object({
-      eventId: z.string(),
-      merkleTreeAddress: z.string(),
-      transactionSignature: z.string(),
-    }))
+    .input(updateEventOnChainInfoSchema)
     .mutation(async ({ ctx, input }) => {
       try {
         // Verify the user owns this event
@@ -166,6 +197,16 @@ export const eventRouter = createTRPCRouter({
           });
         }
 
+        // Validate the merkle tree address is a valid Solana address
+        try {
+          new PublicKey(input.merkleTreeAddress);
+        } catch (err) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invalid Merkle tree address",
+          });
+        }
+
         // Update the event record with on-chain information
         await ctx.db
           .update(events)
@@ -178,7 +219,6 @@ export const eventRouter = createTRPCRouter({
 
         return {
           success: true,
-          event,
           message: "Event on-chain information updated successfully",
         };
       } catch (error) {
@@ -210,6 +250,22 @@ export const eventRouter = createTRPCRouter({
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Event not found or you are not the creator",
+          });
+        }
+
+        // Check if event is initialized on-chain
+        if (!event.onChainInitialized) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Event must be initialized on-chain before generating QR codes",
+          });
+        }
+
+        // Check if max supply has been reached
+        if (event.claimedCount >= event.maxSupply) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Maximum token supply reached. Cannot generate more QR codes.",
           });
         }
 
@@ -255,7 +311,7 @@ export const eventRouter = createTRPCRouter({
 
   // Get all QR codes for an event
   getEventQrCodes: protectedProcedure
-    .input(z.object({ eventId: z.string() }))
+    .input(z.object({ eventId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       try {
         // Verify the user owns this event
@@ -293,7 +349,7 @@ export const eventRouter = createTRPCRouter({
     }),
 
   // Validate and claim a token using a QR code
-  claimToken: publicProcedure
+  claimToken: protectedProcedure
     .input(claimTokenSchema)
     .mutation(async ({ ctx, input }) => {
       try {
@@ -370,6 +426,31 @@ export const eventRouter = createTRPCRouter({
           });
         }
 
+        // Check if user has a wallet address
+        if (!(ctx.session.user as any).walletAddress) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "You must connect a wallet to claim a token",
+          });
+        }
+
+        const userWallet = (ctx.session.user as any).walletAddress;
+
+        // Check if user has already claimed from this event
+        const existingClaim = await ctx.db.query.claimedTokens.findFirst({
+          where: and(
+            eq(claimedTokens.eventId, event.id),
+            eq(claimedTokens.userId, ctx.session.user.id)
+          ),
+        });
+
+        if (existingClaim) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "You have already claimed a token from this event",
+          });
+        }
+
         // Mark QR code as used
         await ctx.db
           .update(qrCodes)
@@ -379,6 +460,40 @@ export const eventRouter = createTRPCRouter({
             claimedAt: new Date(),
           })
           .where(eq(qrCodes.id, qrCode.id));
+
+        // Create the token data for the leaf hash
+        if (!event.merkleTreeAddress) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Event Merkle tree has not been properly initialized",
+          });
+        }
+        
+        const eventPubkey = new PublicKey(event.merkleTreeAddress);
+        const userPubkey = new PublicKey(userWallet);
+        const tokenId = event.claimedCount + 1;
+        
+        // Create the leaf hash
+        const leafHash = Buffer.from(
+          createLeafHash(
+            eventPubkey,
+            userPubkey,
+            tokenId,
+            currentTime
+          )
+        ).toString('hex');
+
+        // Create a new claimed token entry
+        const [claimedToken] = await ctx.db.insert(claimedTokens).values({
+          eventId: event.id,
+          userId: ctx.session.user.id,
+          claimerWallet: userWallet,
+          tokenId: tokenId,
+          leafHash: leafHash,
+          claimTime: new Date(),
+          qrCodeId: qrCode.id,
+          verified: false,
+        }).returning();
 
         // Increment claimed count
         await ctx.db
@@ -398,6 +513,7 @@ export const eventRouter = createTRPCRouter({
             claimedBy: ctx.session.user.id,
             claimedAt: new Date(),
           },
+          claimedToken,
         };
       } catch (error) {
         console.error("Error claiming token:", error);
@@ -407,6 +523,58 @@ export const eventRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to claim token",
+        });
+      }
+    }),
+
+  // Update claimed token with on-chain information
+  updateTokenOnChainInfo: protectedProcedure
+    .input(z.object({
+      claimedTokenId: z.string().uuid(),
+      leafIndex: z.number().int().nonnegative(),
+      transactionSignature: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{87,88}$/, "Invalid transaction signature format"),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        // Find the claimed token
+        const claimedToken = await ctx.db.query.claimedTokens.findFirst({
+          where: and(
+            eq(claimedTokens.id, input.claimedTokenId),
+            eq(claimedTokens.userId, ctx.session.user.id)
+          ),
+        });
+
+        if (!claimedToken) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Claimed token not found or you are not the claimer",
+          });
+        }
+
+        // Update the claimed token record with on-chain information
+        const [updatedToken] = await ctx.db
+          .update(claimedTokens)
+          .set({
+            leafIndex: input.leafIndex,
+            transactionSignature: input.transactionSignature,
+            verified: true,
+          })
+          .where(eq(claimedTokens.id, input.claimedTokenId))
+          .returning();
+
+        return {
+          success: true,
+          claimedToken: updatedToken,
+          message: "Token on-chain information updated successfully",
+        };
+      } catch (error) {
+        console.error("Error updating token on-chain info:", error);
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to update token on-chain information",
         });
       }
     }),
@@ -427,7 +595,13 @@ export const eventRouter = createTRPCRouter({
           });
         }
 
-        return qrCode;
+        // Do not return the secret key in the response for security
+        const { secretKey, ...safeQrCode } = qrCode;
+
+        return {
+          ...safeQrCode,
+          requiresSecretKey: true,
+        };
       } catch (error) {
         console.error("Error getting QR code details:", error);
         if (error instanceof TRPCError) {
@@ -436,6 +610,116 @@ export const eventRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to get QR code details",
+        });
+      }
+    }),
+
+  // Get claimed tokens for a user
+  getMyClaimedTokens: protectedProcedure
+    .query(async ({ ctx }) => {
+      try {
+        const tokens = await ctx.db.query.claimedTokens.findMany({
+          where: eq(claimedTokens.userId, ctx.session.user.id),
+          orderBy: (claimedTokens, { desc }) => [desc(claimedTokens.claimTime)],
+          with: {
+            event: true,
+          },
+        });
+
+        return tokens;
+      } catch (error) {
+        console.error("Error getting claimed tokens:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch claimed tokens",
+        });
+      }
+    }),
+
+  // Get claimed tokens for an event (for event creator)
+  getEventClaimedTokens: protectedProcedure
+    .input(z.object({ eventId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      try {
+        // Verify the user owns this event
+        const event = await ctx.db.query.events.findFirst({
+          where: and(
+            eq(events.id, input.eventId),
+            eq(events.creatorId, ctx.session.user.id)
+          ),
+        });
+
+        if (!event) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Event not found or you are not the creator",
+          });
+        }
+
+        // Get all claimed tokens for this event
+        const eventTokens = await ctx.db.query.claimedTokens.findMany({
+          where: eq(claimedTokens.eventId, input.eventId),
+          orderBy: (claimedTokens, { desc }) => [desc(claimedTokens.claimTime)],
+        });
+
+        return eventTokens;
+      } catch (error) {
+        console.error("Error getting event claimed tokens:", error);
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch claimed tokens",
+        });
+      }
+    }),
+
+  // Toggle event active status
+  toggleEventStatus: protectedProcedure
+    .input(z.object({ 
+      eventId: z.string().uuid(),
+      isActive: z.boolean(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        // Verify the user owns this event
+        const event = await ctx.db.query.events.findFirst({
+          where: and(
+            eq(events.id, input.eventId),
+            eq(events.creatorId, ctx.session.user.id)
+          ),
+        });
+
+        if (!event) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Event not found or you are not the creator",
+          });
+        }
+
+        // Update the event status
+        const [updatedEvent] = await ctx.db
+          .update(events)
+          .set({
+            isActive: input.isActive,
+          })
+          .where(eq(events.id, input.eventId))
+          .returning();
+
+        return {
+          success: true,
+          event: updatedEvent,
+          message: `Event ${input.isActive ? 'activated' : 'deactivated'} successfully`,
+        };
+      } catch (error) {
+        console.error("Error toggling event status:", error);
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to update event status",
         });
       }
     }),
