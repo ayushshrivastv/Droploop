@@ -27,7 +27,7 @@ export const ReadmeShowcase: React.FC = () => {
             Project <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-500">Overview</span>
           </h2>
           <p className="text-zinc-400 max-w-2xl mx-auto">
-            Technical details about the Scalable cToken implementation
+            Technical details about the Droploop referral system implementation
           </p>
         </motion.div>
         

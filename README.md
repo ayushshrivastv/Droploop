@@ -1,28 +1,28 @@
-# Scalable cToken (Solana Pay)
+# Droploop: Decentralized Referral System
 
-Scalable cToken Distribution with Solana Pay and ZK Compression on Solana
+A decentralized referral system built on Solana using ZK Compression with Light Protocol
 
-A high throughput solution for creating and distributing compressed proof-of-participation tokens at scale on Solana blockchain using Solana Pay and Light Protocol's compression technology.
+A powerful and cost-effective solution for creating and managing referral campaigns on the Solana blockchain through compressed tokens and the power of ZK compression technology.
 
- **[Scalable cToken Page](https://scalable-c-token-ayushshrivastvs-projects.vercel.app/)**
+**[Droploop Project](https://github.com/ayushshrivastv/Droploop)**
 
 ![Screenshot 2025-05-11 at 3 10 50 AM](https://github.com/user-attachments/assets/f3607a9c-9026-46d0-8559-f83740a2eab7)
 
 ## Overview
 
-This project enables event organisers to mint digital proof-of-participation tokens that can be claimed by attendees through a simple scan of a QR code. These tokens are not just symbolic; they represent verifiable, compressed assets living entirely on-chain, making them ideal for airdrops, community rewards, or credentialing at scale.
+Droploop enables creators to build decentralized referral campaigns that reward users for inviting others to join their community. Through unique QR codes and referral links, users can easily share and track their referrals, with rewards automatically distributed as compressed tokens on the Solana blockchain.
 
-Built for the ZK Compression Track of the Superteam x Solana 1000x Hackathon, this application demonstrates how real-world events can benefit from blockchain technology without compromising on speed, cost, or user experience.
+Built for the Best cPOP Interface track of the 1000x Hackathon, this application demonstrates how referral programs can leverage blockchain technology for transparency, cost-effectiveness, and scalability without compromising on user experience.
 
-## Solana Pay and Smart Contract Workflow
+## Referral System Workflow
 
-This Scalable cToken uses Solana Pay to make QR code interactions super easy. Attendees can claim tokens without any hassle. The organizers set up a smart contract on Solana to mint tokens. This contract uses Light Protocol’s infrastructure to create cTokens. When an attendee scans the Solana Pay QR code, it sends a transaction to the smart contract. The smart contract checks if the claim is valid and then sends a unique, compressed proof-of-participation token straight to the attendee’s wallet. This way, the tokens are distributed securely and efficiently.
+Droploop uses Light Protocol's ZK Compression to make referral campaigns cost-effective and scalable. When a creator starts a campaign, they generate unique referral codes that can be shared via QR codes. When someone joins through a referral, the smart contract verifies the legitimacy of the referral and rewards both the referrer and the new user with compressed tokens. All transactions are securely recorded on the Solana blockchain with ZK Compression, making the entire process 1000x more affordable than traditional methods.
 
 ## Functionality
 
-Organisers can log in with their Solana wallet, create a new event, and instantly mint compressed tokens tied to event metadata such as name, time, and location. Upon creation, the system generates a Solana Pay-compatible QR code, which attendees can scan to securely claim their tokens via their own wallet. Each token is issued using Light Protocol's compression infrastructure, drastically reducing storage costs while maintaining full L1 composability.
+Creators can connect their Solana wallet, initiate a referral campaign, and set the reward parameters for both referrers and new joiners. Upon creation, the system generates unique referral QR codes and links that can be distributed across various channels. Users can join through these referrals and earn rewards in the form of compressed tokens. All campaign statistics are tracked in real-time, giving creators full visibility into their referral program's performance.
 
-The user interface is built to be intuitive across devices and accommodates both the event creator and attendee journeys—from minting to claiming—with minimal friction.
+## Solana Pay and Smart Contract Workflow
 
 ![442056085-235a9be9-e4fa-46f9-989e-1b1ce8cda931](https://github.com/user-attachments/assets/f7a7ba25-3150-4b68-a109-b3f85af91110)
 
@@ -30,37 +30,37 @@ The user interface is built to be intuitive across devices and accommodates both
 
 ![442056106-0c9807e2-f345-4c51-b399-fb8932c9bcb1](https://github.com/user-attachments/assets/ed907b7b-4264-41ea-a7c4-5e3010d846fe)
 
-## QR Codes & Airdrops
+## Referral System & Rewards
 
-### Solana Pay QR Codes
-The application leverages Solana Pay's QR code technology to create a seamless claiming experience:
+### QR Code Referrals
+The application leverages QR code technology to create a seamless referral experience:
 
-- **Dynamic Generation**: Each event automatically generates a unique QR code that encodes all necessary transaction data
+- **Unique Generation**: Each campaign participant receives personalized QR codes for tracking their referrals
 - **Instant Recognition**: Compatible with any standard QR scanner or smartphone camera
-- **Transaction Embedding**: QR codes contain pre-formatted transaction instructions for token claiming
+- **Referral Embedding**: QR codes contain all necessary referral data for attribution
 - **Wallet Connectivity**: Scanning initiates an immediate connection to the user's preferred Solana wallet
-- **Security Features**: Each QR code includes validation parameters to prevent unauthorized claims
+- **Security Features**: Each QR code includes validation parameters to prevent fraudulent claims
 
-### Airdrop Capabilities
-The platform offers efficient airdrop functionality for event organizers:
+### Reward Distribution
+The platform offers efficient reward distribution for referral campaigns:
 
-- **Bulk Distribution**: Send tokens to multiple recipients simultaneously with minimal gas costs
-- **Targeted Campaigns**: Create audience segments based on event participation or other criteria
-- **Scheduled Releases**: Set up timed airdrops to coincide with event milestones
-- **Claim Verification**: Monitor real-time claiming statistics through an intuitive dashboard
-- **Flexible Allocation**: Distribute different quantities of tokens to different participant tiers
+- **Dual Rewards**: Both referrers and new joiners receive compressed tokens as rewards
+- **Automatic Transfers**: Rewards are automatically distributed upon successful referral verification
+- **Real-time Tracking**: All referrals and rewards are tracked in a comprehensive dashboard
+- **Conversion Analytics**: Monitor conversion rates and campaign performance metrics
+- **Flexible Reward Structure**: Configure different reward tiers based on referral volume or user type
 
-This combination of QR-based claiming and airdrop functionality makes the platform ideal for both in-person events and remote participation scenarios.
+This combination of QR-based referrals and automatic reward distribution makes the platform ideal for growing communities and incentivizing user acquisition.
 
-**[Try the live demo here](https://scalable-c-token-ayushshrivastvs-projects.vercel.app/)**
+**[Explore the GitHub repository](https://github.com/ayushshrivastv/Droploop)**
 
 ## Setup & Installation
 
 To run this project locally, ensure you have Node.js 16 or later and a compatible Solana wallet (Phantom, Backpack, or Solflare). Clone the repository and install dependencies using:
 
 ```bash
-git clone https://github.com/ayushshrivastv/Scalable-cToken.git
-cd Scalable-cToken
+git clone https://github.com/ayushshrivastv/Droploop.git
+cd Droploop
 npm install
 ```
 
@@ -81,25 +81,25 @@ The application will be available at [http://localhost:3000](http://localhost:30
 
 ## Using the Application
 
-To create tokens, connect your wallet and navigate to the "Create Event" section. Fill out the event information, confirm the transaction, and a QR code will be generated for distribution. Attendees can scan this QR code using any QR reader or camera app, which will launch Solana Pay and guide them through the token claim process in a few simple steps.
+To create a referral campaign, connect your wallet and navigate to the "Create Campaign" section. Set up your campaign parameters, including reward amounts for referrers and new joiners. Once created, you'll receive unique referral codes and QR codes to share. Users can join through these referrals by scanning the QR code or entering the referral code, connecting their wallet, and receiving their reward tokens automatically.
 
-The process is secure, affordable, and designed for high-volume usage at real-world events.
+The entire process is secure, affordable, and designed for high-volume referral campaigns with minimal overhead.
 
 ## Technical Stack
 
-This application is built with Next.js 15, React 18, and TypeScript, using Tailwind CSS and shadcn/ui for the frontend. Blockchain functionality is powered by Solana, with Light Protocol handling compression. Wallet interactions are handled via the Solana Wallet Adapter framework.
+This application is built with Next.js 15, React 18, and TypeScript, using Tailwind CSS and shadcn/ui for the frontend. Blockchain functionality is powered by Solana, with Light Protocol handling ZK Compression for tokens. Wallet interactions are handled via the Solana Wallet Adapter framework.
 
-The architecture allows easy extensibility and is suitable for further enhancements such as event analytics, email confirmations, or token gating.
+The architecture is designed for easy extensibility and is suitable for further enhancements such as advanced analytics, multi-tier referral programs, or custom reward structures.
 
 ## Quantified Benefits
 
-| Metric | Traditional NFTs | Scalable cToken | Improvement |
-|--------|-----------------|-----------------|-------------|
-| Storage Cost per Token | ~0.005 SOL | ~0.000005 SOL | 1000x reduction |
-| Tokens per Transaction | 1 | Up to 1,000 | 1000x throughput |
-| Gas Fees for 10,000 Tokens | ~50 SOL | ~0.05 SOL | 1000x savings |
-| Claim Transaction Time | 2-5 seconds | 2-5 seconds | Equal UX |
-| Maximum Event Size | ~1,000 attendees | 100,000+ attendees | 100x scalability |
+| Metric | Traditional Referral Programs | Droploop | Improvement |
+|--------|---------------------------|-----------------|-------------|
+| Storage Cost per Referral | ~0.005 SOL | ~0.000005 SOL | 1000x reduction |
+| Referrals per Transaction | 1 | Up to 1,000 | 1000x throughput |
+| Gas Fees for 10,000 Referrals | ~50 SOL | ~0.05 SOL | 1000x savings |
+| Referral Verification Time | 2-5 seconds | 2-5 seconds | Equal UX |
+| Maximum Campaign Size | ~1,000 participants | 100,000+ participants | 100x scalability |
 
 For more in-depth technical details, refer to the [src/README.md](./src/README.md) file.
 
@@ -114,17 +114,23 @@ npm run start       # Start production server
 ```
 ## User Experience Showcase
 
-### Organizer Journey
+### Creator Journey
 1. Connect wallet and access the intuitive dashboard
-2. Create an event with custom branding and metadata
-3. Generate a unique QR code for distribution
-4. Monitor real-time claim statistics
+2. Create a referral campaign with custom reward parameters
+3. Generate and share unique referral QR codes
+4. Monitor real-time referral statistics
 
-### Attendee Journey
-1. Scan event QR code with any Phone
-2. Connect Solana wallet with a single tap
-3. Claim compressed token in seconds
-4. Instantly verify token in wallet
+### Referrer Journey
+1. Join a campaign and receive a personalized referral code
+2. Share referral QR code with potential new users
+3. Track referral conversions in profile dashboard
+4. Receive compressed token rewards automatically
+
+### New User Journey
+1. Scan referral QR code or enter referral code
+2. Connect Solana wallet with a simple click
+3. Join the campaign and receive welcome rewards
+4. Get your own referral code to continue the chain
 
 ## Deployment
 
@@ -148,4 +154,4 @@ Gratitude to the teams behind Light Protocol and Solana for their exceptional in
 
 Crafted with care by Ayush Srivastava
 
-*Submission for the 1000x Hackathon - Best cToken Integration for Solana Pay*
+*Submission for the 1000x Hackathon - Best cPOP Interface Track*

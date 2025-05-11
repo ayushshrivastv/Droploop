@@ -21,7 +21,7 @@ const alertVariants = cva(
 
 const Alert = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof alertVariants>
+  React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof alertVariants> & { className?: string }
 >(({ className, variant, ...props }, ref) => (
   <div
     ref={ref}
@@ -34,7 +34,7 @@ Alert.displayName = "Alert"
 
 const AlertTitle = React.forwardRef<
   HTMLParagraphElement,
-  React.HTMLAttributes<HTMLHeadingElement>
+  React.HTMLAttributes<HTMLHeadingElement> & { className?: string }
 >(({ className, ...props }, ref) => (
   <h5
     ref={ref}
@@ -46,9 +46,9 @@ AlertTitle.displayName = "AlertTitle"
 
 const AlertDescription = React.forwardRef<
   HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
+  React.HTMLAttributes<HTMLParagraphElement> & { className?: string }
 >(({ className, ...props }, ref) => (
-  <div
+  <p
     ref={ref}
     className={cn("text-sm [&_p]:leading-relaxed", className)}
     {...props}

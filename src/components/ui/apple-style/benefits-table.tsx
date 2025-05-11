@@ -38,7 +38,7 @@ export const BenefitsTable: React.FC<BenefitsTableProps> = ({ metrics }) => {
             Quantified <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-500">Benefits</span>
           </h2>
           <p className="text-zinc-400 max-w-2xl mx-auto">
-            Scalable cToken delivers massive improvements over traditional NFTs
+            Droploop delivers massive improvements over traditional referral systems
           </p>
         </motion.div>
         
@@ -61,7 +61,7 @@ export const BenefitsTable: React.FC<BenefitsTableProps> = ({ metrics }) => {
                     Traditional NFTs
                   </th>
                   <th scope="col" className="px-6 py-5 text-left text-sm font-semibold text-white">
-                    Scalable cToken
+                    Droploop
                   </th>
                   <th scope="col" className="px-6 py-5 text-left text-sm font-semibold text-indigo-400">
                     Improvement
@@ -106,8 +106,8 @@ export const BenefitsTable: React.FC<BenefitsTableProps> = ({ metrics }) => {
           className="mt-8 max-w-3xl mx-auto text-center"
         >
           <p className="text-zinc-400 text-sm">
-            By leveraging Light Protocol's state compression technology, Scalable cToken delivers dramatic improvements in cost and scalability
-            while maintaining the same user experience and security guarantees as traditional NFTs.
+            By leveraging Light Protocol's state compression technology, Droploop delivers dramatic improvements in cost and scalability
+            while maintaining a seamless user experience for decentralized referral campaigns.
           </p>
         </motion.div>
       </div>

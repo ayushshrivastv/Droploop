@@ -6,13 +6,13 @@ import { SimplifiedFooter } from '@/components/ui/apple-style/simplified-footer'
 import { ROUTES } from '@/lib/constants';
 
 interface AppleLayoutProps {
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 const navItems = [
   { label: 'Home', href: ROUTES.HOME },
-  { label: 'Create Event', href: ROUTES.MINT },
-  { label: 'Claim Token', href: ROUTES.CLAIM },
+  { label: 'Create Campaign', href: ROUTES.MINT },
+  { label: 'Join Referral', href: ROUTES.CLAIM },
 ];
 
 export const AppleLayout: React.FC<AppleLayoutProps> = ({ children }) => {

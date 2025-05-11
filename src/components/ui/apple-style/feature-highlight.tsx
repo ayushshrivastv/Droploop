@@ -11,6 +11,7 @@ interface FeatureHighlightItem {
 
 interface FeatureHighlightProps {
   title: string;
+  subtitle?: string;
   description: string;
   items: FeatureHighlightItem[];
   primaryColor: string;

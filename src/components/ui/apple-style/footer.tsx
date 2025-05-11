@@ -41,8 +41,8 @@ export const Footer: React.FC<FooterProps> = ({ className = '' }) => {
           <div className="space-y-4">
             <Link href="/" className="flex items-center">
               <span className="text-xl font-bold tracking-tight flex items-center">
-                <span className="text-white">Scalable</span>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600 ml-1">cToken</span>
+                <span className="text-white">Decentralized</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600 ml-1">Droploop</span>
               </span>
             </Link>
             <p className="text-sm">
@@ -87,7 +87,7 @@ export const Footer: React.FC<FooterProps> = ({ className = '' }) => {
             <h3 className="text-white font-medium mb-4">Connect</h3>
             <div className="flex space-x-4">
               <Link 
-                href="https://github.com/ayushshrivastv/Scalable-cToken" 
+                href="https://github.com/ayushshrivastv/Droploop" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-zinc-400 hover:text-white transition-colors"

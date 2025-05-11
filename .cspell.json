@@ -1,0 +1,20 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "Droploop",
+    "Merkle",
+    "merkle",
+    "incentivizing",
+    "Solana",
+    "cToken",
+    "cTokens",
+    "cPOP"
+  ],
+  "ignorePaths": [
+    "node_modules/**",
+    ".next/**",
+    "dist/**",
+    "build/**"
+  ]
+}

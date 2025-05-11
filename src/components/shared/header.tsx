@@ -23,8 +23,7 @@ export const Header: FC<HeaderProps> = ({ activePage }) => {
         <div className="flex items-center">
           <Link href={ROUTES.HOME} className="flex items-center">
             <span className="text-2xl md:text-3xl font-bold tracking-tight flex items-center">
-              <span className="text-white">Scalable</span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600 ml-1">cToken</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600">Droploop</span>
             </span>
           </Link>
         </div>
@@ -35,13 +34,13 @@ export const Header: FC<HeaderProps> = ({ activePage }) => {
             href={ROUTES.MINT}
             className={`text-sm font-medium transition-colors hover:text-primary ${activePage === ROUTES.MINT ? 'text-foreground' : 'text-muted-foreground'}`}
           >
-            Create Event
+            Create Campaign
           </Link>
           <Link 
             href={ROUTES.CLAIM}
             className={`text-sm font-medium transition-colors hover:text-primary ${activePage === ROUTES.CLAIM ? 'text-foreground' : 'text-muted-foreground'}`}
           >
-            Claim Token
+            Join Referral
           </Link>
         </nav>
 
@@ -83,14 +82,14 @@ export const Header: FC<HeaderProps> = ({ activePage }) => {
               className={`text-sm font-medium transition-colors hover:text-primary ${activePage === ROUTES.MINT ? 'text-foreground' : 'text-muted-foreground'}`}
               onClick={() => setMobileMenuOpen(false)}
             >
-              Create Event
+              Create Campaign
             </Link>
             <Link 
               href={ROUTES.CLAIM}
               className={`text-sm font-medium transition-colors hover:text-primary ${activePage === ROUTES.CLAIM ? 'text-foreground' : 'text-muted-foreground'}`}
               onClick={() => setMobileMenuOpen(false)}
             >
-              Claim Token
+              Join Referral
             </Link>
           </nav>
           <div className="flex items-center justify-between pt-4 border-t border-border/40">

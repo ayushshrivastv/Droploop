@@ -5,11 +5,13 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 
 interface FeatureSectionProps {
   title: string;
+  subtitle?: string;
   description: string;
   imageSrc?: string;
   imageAlt?: string;
   reversed?: boolean;
   children?: React.ReactNode;
+  features?: { title: string; description: string; icon: any; }[];
 }
 
 export const FeatureSection: React.FC<FeatureSectionProps> = ({
