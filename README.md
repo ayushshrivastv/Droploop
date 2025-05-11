@@ -189,10 +189,6 @@ anchor build
 anchor deploy --provider.cluster devnet
 ```
 
-## Deployment
-
-For detailed deployment instructions, see [DEPLOYMENT.md](./solana-cpop/DEPLOYMENT.md).
-
 ## Technical Implementation
 
 ### Smart Contracts
