@@ -1,3 +1,0 @@
-[build]
-  publish = "public"
-  command = "cp index.html public/"

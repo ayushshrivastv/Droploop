@@ -1,4 +1,4 @@
-# cPOP ZK Compression Architecture 
+# Droploop: Decentralized Referral Program Architecture
 
 ## System Architecture
 
@@ -8,218 +8,252 @@
 │   Frontend (Next.js + React)        │      │  Solana On-Chain Programs       │
 │   ┌────────────────────────────┐    │      │  ┌─────────────────────────┐    │
 │   │                            │    │      │  │                         │    │
-│   │   Event Creator Dashboard  │    │      │  │  cPOP Anchor Program    │    │
-│   │   - Create Events          │    │      │  │  - initialize_event     │    │
-│   │   - Generate QR Codes      │────┼──────┼─▶│  - generate_qr_code     │    │
-│   │   - View Claims            │    │      │  │  - claim_token          │    │
-│   │                            │    │      │  │  - verify_token         │    │
+│   │   Creator Dashboard        │    │      │  │  Referral Program       │    │
+│   │   - Mint cTokens           │    │      │  │  - initialize_campaign  │    │
+│   │   - Generate Referral QRs  │────┼──────┼─▶│  - generate_referral    │    │
+│   │   - View Referrals         │    │      │  │  - claim_reward         │    │
+│   │                            │    │      │  │  - verify_referral      │    │
 │   └────────────────────────────┘    │      │  │                         │    │
 │                                     │      │  └─────────────┬───────────┘    │
 │   ┌────────────────────────────┐    │      │                │                │
 │   │                            │    │      │  ┌─────────────▼───────────┐    │
-│   │   Attendee Interface       │    │      │  │                         │    │
-│   │   - Scan QR Codes          │    │      │  │  SPL Account Compression│    │
-│   │   - Claim Tokens           │────┼──────┼─▶│  - init_empty_merkle_   │    │
-│   │   - View Claimed Tokens    │    │      │  │    tree                 │    │
-│   │                            │    │      │  │  - append_leaf          │    │
-│   └────────────────────────────┘    │      │  │  - verify_leaf          │    │
-│                                     │      │  │                         │    │
-└─────────────────────────────────────┘      │  └─────────────┬───────────┘    │
-                                             │                │                │
-┌─────────────────────────────────────┐      │  ┌─────────────▼───────────┐    │
-│                                     │      │  │                         │    │
-│   Database (PostgreSQL)             │      │  │  SPL No-Op Program      │    │
-│   ┌────────────────────────────┐    │      │  │  - Used for emitting    │    │
-│   │                            │    │      │  │    compression events   │    │
-│   │   Events                   │    │      │  │    as CPI instruction   │    │
-│   │   - metadata               │    │      │  │    data                 │    │
-│   │   - Merkle tree info       │    │      │  │                         │    │
-│   │                            │    │      │  └─────────────────────────┘    │
-│   └────────────────────────────┘    │      │                                 │
-│                                     │      └─────────────────────────────────┘
-│   ┌────────────────────────────┐    │
-│   │                            │    │      ┌─────────────────────────────────┐
-│   │   QR Codes                 │    │      │                                 │
-│   │   - event association      │    │      │   Merkle Tree Data Structure    │
-│   │   - secret keys            │    │      │   ┌─────────────────────────┐   │
-│   │   - expiration             │    │      │   │                         │   │
-│   │                            │    │      │   │     Root Node           │   │
-│   └────────────────────────────┘    │      │   │         │               │   │
-│                                     │      │   │     ┌───┴────┐           │   │
-│   ┌────────────────────────────┐    │      │   │     │        │           │   │
-│   │                            │    │      │   │  Node A    Node B        │   │
-│   │   Claimed Tokens           │    │      │   │   │ │       │ │          │   │
-│   │   - leaf hash              │    │      │   │ ┌─┴─┴─┐   ┌─┴─┴─┐        │   │
-│   │   - claim info             │    │      │   │ │     │   │     │        │   │
-│   │                            │    │      │   │Leaf1 Leaf2 Leaf3 Leaf4   │   │
-│   └────────────────────────────┘    │      │   │                         │   │
-│                                     │      │   └─────────────────────────┘   │
+│   │   User Claim Interface     │    │      │  │                         │    │
+│   │   - Scan QR Codes          │    │      │  │  Light Protocol         │    │
+│   │   - Claim cTokens          │────┼──────┼─▶│  - compressed_token     │    │
+│   │   - View Claimed Tokens    │    │      │  │  - stateless.js         │    │
+│   │                            │    │      │  │  - state compression    │    │
+│   └────────────────────────────┘    │      │  │                         │    │
+│                                     │      │  └─────────────┬───────────┘    │
+│   ┌────────────────────────────┐    │      │                │                │
+│   │                            │    │      │  ┌─────────────▼───────────┐    │
+│   │   Referral Tracker         │    │      │  │                         │    │
+│   │   - Statistics             │    │      │  │  Solana SPL Tokens      │    │
+│   │   - Leaderboard            │────┼──────┼─▶│  - Token Program        │    │
+│   │   - Rewards History        │    │      │  │  - Associated Token     │    │
+│   │                            │    │      │  │    Account Program      │    │
+│   └────────────────────────────┘    │      │  │                         │    │
+│                                     │      │  └─────────────────────────┘    │
 └─────────────────────────────────────┘      │                                 │
+                                             └─────────────────────────────────┘
+┌─────────────────────────────────────┐      
+│                                     │      ┌─────────────────────────────────┐
+│   Wallet Integration                │      │                                 │
+│   ┌────────────────────────────┐    │      │   ZK Compression               │
+│   │                            │    │      │   ┌─────────────────────────┐   │
+│   │   Solana Wallet Adapter    │    │      │   │                         │   │
+│   │   - Connect Wallet         │    │      │   │     Merkle Tree         │   │
+│   │   - Sign Transactions      │    │      │   │         │               │   │
+│   │   - View Balances          │    │      │   │     ┌───┴────┐           │   │
+│   │                            │    │      │   │     │        │           │   │
+│   └────────────────────────────┘    │      │   │  Referrer  Referee      │   │
+│                                     │      │   │   Trees    Trees        │   │
+└─────────────────────────────────────┘      │   │                         │   │
+                                             │   │   Compressed cTokens    │   │
+                                             │   │                         │   │
+                                             │   └─────────────────────────┘   │
+                                             │                                 │
                                              └─────────────────────────────────┘
 ```
 
 ## Component Flow
 
-### Event Creation Process
-1. **Event Creator** logs into the dashboard 
-2. Creator fills out event details and submits creation form
-3. Frontend sends request to tRPC API endpoint
-4. API creates database entry for the event
-5. Client-side code creates a new Merkle tree account
-6. Client-side code sends transaction to initialize the event on-chain
-7. On-chain `initialize_event` function:
-   - Initializes event data
-   - Makes CPI call to SPL Account Compression's `init_empty_merkle_tree`
-   - Stores Merkle tree account address in event data
-8. Database record is updated with on-chain details
+### Campaign Creation Process
+1. **Creator** logs into the dashboard 
+2. Creator fills out campaign details (name, description, rewards, duration) and submits creation form
+3. Client-side code sends transaction to initialize the campaign on-chain
+4. On-chain `initialize_campaign` function:
+   - Initializes campaign data
+   - Sets up referrer and referee reward structures
+   - Initializes compressed token state using Light Protocol
+   - Creates campaign authority account
+5. Campaign details are stored and displayed on dashboard
 
-### QR Code Generation Process
-1. **Event Creator** selects an event and generates QR code
-2. Frontend sends request to tRPC API endpoint
-3. API generates random secret key and creates QR code entry
-4. Client-side code sends transaction to generate QR code on-chain  
-5. On-chain `generate_qr_code` function:
-   - Creates a QR code account with expiration time
-   - Links it to the event
-6. QR code data (including secret key) is returned to frontend
-7. Frontend generates and displays QR code image
+### Referral Generation Process
+1. **Creator** selects a campaign and generates a referral QR code
+2. Client-side code sends transaction to generate referral on-chain  
+3. On-chain `generate_referral` function:
+   - Creates a referral account with unique identifier
+   - Links it to the creator's campaign
+   - Allocates compressed token allocation for this referral
+4. QR code data with referral ID is returned to frontend
+5. Frontend generates and displays QR code image for sharing
 
-### Token Claim Process
-1. **Attendee** scans QR code using the app
-2. Frontend decodes QR code and extracts event ID, QR code ID, and secret key
-3. Frontend sends claim request to tRPC API endpoint
-4. API validates the QR code hasn't been used and isn't expired
-5. Client-side code sends transaction to claim token on-chain
-6. On-chain `claim_token` function:
-   - Verifies QR code validity
-   - Creates token data (event, claimer, token ID, claim time)
-   - Hashes token data using Poseidon hasher
-   - Makes CPI call to SPL Account Compression's `append_leaf` 
-   - Updates claimed count on event
-   - Marks QR code as claimed
-7. Database records are updated with claim information
+### Referral Claim Process
+1. **User** scans QR code or inputs referral code
+2. Frontend decodes QR/referral code and extracts campaign ID and referral ID
+3. Client-side code sends transaction to claim reward on-chain
+4. On-chain `claim_reward` function:
+   - Verifies referral validity and that it hasn't been claimed by this user
+   - Creates compressed cToken with Light Protocol
+   - Mints appropriate rewards to both referrer and referee
+   - Records the referral relationship on-chain
+   - Updates referral statistics
+5. User receives confirmation of claimed reward
 
-### Token Verification Process
-1. **Attendee or Verifier** requests to verify a token
-2. Client-side code retrieves Merkle proof for the token
-3. Client-side code sends transaction to verify token on-chain
-4. On-chain `verify_token` function:
-   - Makes CPI call to SPL Account Compression's `verify_leaf`
-   - Validates the Merkle proof against the stored root
+### Referral Verification Process
+1. **User or Creator** requests to verify a referral
+2. Client-side code retrieves proof of the referral relationship
+3. Client-side code sends transaction to verify referral on-chain
+4. On-chain `verify_referral` function:
+   - Verifies the compressed cToken ownership
+   - Validates the referral relationship exists
    - Returns verification result
 
-## ZK Compression Integration
+## Light Protocol ZK Compression Integration
 
-The cPOP system leverages Solana's State Compression and ZK proofs via the SPL Account Compression program to efficiently store token data on-chain:
+The Droploop referral system leverages Solana's State Compression through Light Protocol to efficiently store referral relationships and token data on-chain:
 
-1. **Space Efficiency**: Instead of creating separate token mint accounts for each token, all token data is stored as leaves in a Merkle tree, with only the root stored on-chain.
+1. **Space Efficiency**: Instead of creating separate token mint accounts for each referral, all referral data is stored as compressed state, significantly reducing on-chain storage costs.
 
-2. **Concurrent Updates**: The Concurrent Merkle Tree implementation allows multiple users to claim tokens simultaneously without conflicts.
+2. **Scalability**: The system can handle millions of referrals with minimal on-chain storage cost, making it ideal for viral referral campaigns.
 
-3. **Proof Verification**: The system uses ZK proofs to verify token ownership without exposing the full token data.
+3. **Cost Reduction**: Using Light Protocol's compressed token standard drastically reduces the cost of minting and managing tokens, enabling micro-reward systems that would be cost-prohibitive with regular SPL tokens.
 
-4. **Scalability**: The system can handle millions of tokens with minimal on-chain storage cost, making it ideal for large-scale events.
+4. **Proof Verification**: The system uses ZK proofs to verify referral relationships without exposing sensitive user data.
 
 ## Data Structure
 
 ### On-Chain Accounts
-- **Event Account** (PDA): Stores event metadata and Merkle root
-- **QR Code Account** (PDA): Stores QR code data and claim status
-- **Merkle Tree Account**: Stores the actual Merkle tree data structure
+- **Campaign Account** (PDA): Stores campaign metadata and configuration
+- **Referral Account** (PDA): Stores referral data and claim status
+- **User Account** (PDA): Stores user referral statistics
+- **Compressed Token State**: Stores the compressed token data managed by Light Protocol
 
-### Merkle Tree Leaf Structure
-```
-TokenData {
-  event: Pubkey,     // The event's public key
-  claimer: Pubkey,   // Claimer's wallet address
-  token_id: u64,     // Unique token identifier
-  claim_time: i64,   // Unix timestamp of claim
+### Compressed Token Structure
+```rust
+ReferralData {
+  campaign: Pubkey,     // The campaign's public key
+  referrer: Pubkey,     // Referrer's wallet address
+  referee: Pubkey,      // Referee's wallet address (who claimed the referral)
+  referral_id: String,  // Unique referral identifier
+  claim_time: i64,      // Unix timestamp of claim
+  reward_amount: u64,   // Amount of rewards distributed
 }
 ```
 
-The leaf node in the Merkle tree is created by hashing this TokenData structure using Poseidon hashing.
+This data is compressed using Light Protocol's compression techniques and state management.
 
 ## Security Features
 
-1. **Double-Claim Prevention**: QR codes can only be claimed once, and the system tracks claimed tokens in both the database and on-chain.
+1. **Double-Claim Prevention**: Referral codes can only be claimed once per user, and the system tracks claimed rewards on-chain.
 
-2. **Expiration Time**: QR codes can have an expiration time, after which they become invalid.
+2. **Campaign Duration Control**: Campaigns can have defined start and end dates, after which referrals become inactive.
 
-3. **Secret Keys**: Each QR code has a unique secret key that must be presented during claiming.
+3. **Unique Referral IDs**: Each referral has a unique identifier that can be traced back to the original referrer.
 
-4. **Merkle Proof Verification**: Token ownership is verified using cryptographic proofs.
+4. **Proof Verification**: Referral relationships and rewards are verified using Light Protocol's ZK verification.
+
+5. **Sybil Resistance**: Optional user verification mechanisms can be implemented to prevent abuse and ensure unique users.
 
 ## Frontend-Blockchain Communication
 
-### Compression Utility Module
+### Light Protocol Integration Module
 
-The frontend interacts with the SPL Account Compression program through a dedicated utility module (`compression.ts`):
+The frontend interacts with Light Protocol through a dedicated utility module (`lightProtocol.ts`):
 
 ```typescript
-// Example of the utility functions for compression operations
+// Example of the utility functions for Light Protocol operations
 
-// Create a Merkle tree account
-export async function createMerkleTreeAccount(
+// Initialize a new referral campaign
+export async function initializeReferralCampaign(
   wallet: WalletContextState,
-  connection: Connection
-): Promise<Keypair> {
-  const treeKeypair = Keypair.generate();
-  const space = getConcurrentMerkleTreeAccountSize(MAX_DEPTH, MAX_BUFFER_SIZE, CANOPY_DEPTH);
-  const lamports = await connection.getMinimumBalanceForRentExemption(space);
+  connection: Connection,
+  campaignData: {
+    name: string,
+    description: string,
+    referrerReward: number,
+    refereeReward: number,
+    startDate: Date,
+    endDate: Date,
+    maxReferrals: number
+  }
+): Promise<string> {
+  // Import Light Protocol libraries
+  const { CompressedToken } = await import('@lightprotocol/compressed-token');
+  const { StatelessKeypair } = await import('@lightprotocol/stateless.js');
   
-  const createAccountIx = SystemProgram.createAccount({
-    fromPubkey: wallet.publicKey!,
-    newAccountPubkey: treeKeypair.publicKey,
-    lamports,
-    space,
-    programId: SPL_ACCOUNT_COMPRESSION_PROGRAM_ID,
+  // Create compressed token settings for the campaign
+  const compressedToken = new CompressedToken(connection, wallet);
+  
+  // Prepare and send the initialize campaign transaction
+  const tx = await compressedToken.createToken({
+    name: campaignData.name,
+    symbol: 'CREF',
+    uri: JSON.stringify(campaignData),
+    decimals: 0,
+    maxSupply: campaignData.maxReferrals * (campaignData.referrerReward + campaignData.refereeReward)
   });
   
-  const tx = new Transaction().add(createAccountIx);
-  await wallet.sendTransaction(tx, connection, { signers: [treeKeypair] });
-  
-  return treeKeypair;
+  return tx;
 }
 
-// Claim a token and append to Merkle tree
-export async function claimToken(
-  wallet: { publicKey: PublicKey; signTransaction: SignerWalletAdapter["signTransaction"] },
-  eventPDA: PublicKey,
-  merkleTreeAddress: PublicKey,
-  creatorAddress: PublicKey,
-  qrCodeId: string,
-  secretKey: Uint8Array
-): Promise<string> {
-  // Setup Anchor program
-  // Prepare the claim_token instruction
-  // Send and confirm transaction
-  // Return the transaction signature
-}
-
-// Generate a Merkle proof for verification
-export async function generateMerkleProof(
+// Generate a referral link
+export async function generateReferral(
+  wallet: WalletContextState,
   connection: Connection,
-  merkleTreeAddress: PublicKey,
-  leafIndex: number
-): Promise<{ proof: AccountMeta[]; root: Buffer }> {
-  // Fetch the Merkle tree account
-  // Extract the relevant nodes for the proof
-  // Return the proof and current root
+  campaignAddress: PublicKey
+): Promise<{ referralId: string, qrData: string }> {
+  // Import Light Protocol libraries
+  const { CompressedToken } = await import('@lightprotocol/compressed-token');
+  
+  // Create unique referral ID
+  const referralId = generateUniqueId();
+  
+  // Register referral on-chain
+  const compressedToken = new CompressedToken(connection, wallet);
+  await compressedToken.registerReferral(campaignAddress, referralId);
+  
+  // Generate QR code data
+  const qrData = JSON.stringify({
+    campaign: campaignAddress.toString(),
+    referrer: wallet.publicKey?.toString(),
+    referralId
+  });
+  
+  return { referralId, qrData };
+}
+
+// Claim a referral reward
+export async function claimReferralReward(
+  wallet: WalletContextState,
+  connection: Connection,
+  referralData: {
+    campaignAddress: PublicKey,
+    referrerId: PublicKey,
+    referralId: string
+  }
+): Promise<string> {
+  // Import Light Protocol libraries
+  const { CompressedToken } = await import('@lightprotocol/compressed-token');
+  
+  // Initialize compressed token interface
+  const compressedToken = new CompressedToken(connection, wallet);
+  
+  // Claim the referral reward, which mints compressed tokens to both parties
+  const tx = await compressedToken.claimReferral(
+    referralData.campaignAddress,
+    referralData.referrerId,
+    referralData.referralId
+  );
+  
+  return tx;
 }
 ```
 
 ## Future Extensions
 
-The cPOP architecture supports several potential extensions:
+The Droploop referral architecture supports several potential extensions:
 
-1. **Multi-Chain Support**: Expand to other EVM-compatible chains using similar compression techniques.
+1. **Multi-Tier Referrals**: Implement multi-level referral rewards where users earn from their direct referrals and from referrals made by their referees.
 
-2. **Enhanced Token Metadata**: Add support for richer token metadata including images and interactive elements.
+2. **Token Utility Expansion**: Add functionality for cTokens earned through referrals to be used in various applications or exchanged for other digital assets.
 
-3. **Token Transferability**: Implement optional token transfer capabilities while maintaining compression benefits.
+3. **Dynamic Reward Structure**: Implement variable reward structures based on user activity, referral quality, or campaign performance.
 
-4. **Revocation Mechanism**: Add ability for event organizers to revoke tokens in specific circumstances.
+4. **Enhanced Analytics**: Provide detailed analytics on referral performance, conversion rates, and campaign ROI.
 
-5. **Composable Proofs**: Enable tokens to be used as credentials for accessing other services or events.
+5. **Community Growth Gamification**: Add leaderboards, achievements, and challenges to gamify the referral process.
 
-5. **Authority Checks**: Only the event creator can generate QR codes or update event details.
+6. **Cross-Campaign Interactions**: Allow users to leverage their reputation and referral history across multiple campaigns.
+
+7. **DAO Integration**: Enable decentralized governance for setting referral parameters and reward distributions in community-owned campaigns.
