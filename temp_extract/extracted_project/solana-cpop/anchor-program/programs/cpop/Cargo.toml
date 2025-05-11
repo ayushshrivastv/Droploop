@@ -1,0 +1,26 @@
+[package]
+name = "cpop"
+version = "0.1.0"
+description = "Compressed Proof-of-Participation (cPOP) token program using ZK Compression on Solana"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "cpop"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.29.0"
+anchor-spl = "0.29.0"
+solana-program = "1.17.3"
+light-merkle-tree-reference = "0.2.1"
+light-poseidon = "0.2.0"
+light-concurrent-merkle-tree = "0.1.0"
+light-hasher = "0.0.2"
+bytemuck = "1.14.1"

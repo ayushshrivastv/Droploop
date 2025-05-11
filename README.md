@@ -155,3 +155,110 @@ Gratitude to the teams behind Light Protocol and Solana for their exceptional in
 Crafted with care by Ayush Srivastava
 
 *Submission for the 1000x Hackathon - Best cPOP Interface Track*
+- **Token Verification**: Verify token ownership using zero-knowledge proofs
+- **Anti-Double-Claim Protection**: Security measures to prevent duplicate claims
+
+## Setup and Installation
+
+### Prerequisites
+
+- Node.js 18+
+- Rust and Cargo
+- Solana CLI tools
+- Anchor framework
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/ZK-Compression-cPOP-Interface.git
+cd ZK-Compression-cPOP-Interface
+```
+
+2. Install dependencies:
+```bash
+# Install frontend dependencies
+cd solana-cpop
+npm install
+
+# Install Anchor program dependencies
+cd anchor-program
+npm install
+```
+
+3. Configure environment variables:
+```bash
+# Create a .env.local file in the solana-cpop directory with:
+cp .env.example .env.local
+```
+
+### Local Development
+
+1. Start the Next.js development server:
+```bash
+cd solana-cpop
+npm run dev
+```
+
+2. Build and deploy the Anchor program (requires Solana CLI and Anchor):
+```bash
+cd anchor-program
+anchor build
+anchor deploy --provider.cluster devnet
+```
+
+## Deployment
+
+For detailed deployment instructions, see [DEPLOYMENT.md](./solana-cpop/DEPLOYMENT.md).
+
+## Technical Implementation
+
+### Smart Contracts
+
+The Anchor program provides the following functions:
+
+- `initialize_event`: Creates a new event with a Merkle tree for token management
+- `generate_qr_code`: Generates a unique QR code for token claiming
+- `claim_token`: Claims a token by scanning a QR code and appends to the Merkle tree
+- `verify_token`: Verifies token ownership using Merkle proofs
+
+### Frontend
+
+The Next.js frontend provides:
+
+- Event creation and management dashboard
+- QR code generation and display
+- Token claiming interface
+- Verification tools
+
+### Database Schema
+
+- Events: Stores event details and Merkle tree information
+- QR Codes: Manages QR code data including secret keys and expiration times
+- Tokens: Tracks claimed tokens and associated metadata
+
+## Security Considerations
+
+- QR codes include unique secret keys and expiration times
+- Anti-double-claim mechanisms to prevent duplicate token claims
+- Wallet-based authentication for event creation and management
+- Rate limiting to prevent abuse
+
+## Project Status
+
+This project was developed as part of the ZK Compression Track by Solana Foundation, Helius, and Light Protocol. It demonstrates the practical application of compressed accounts for NFT-like use cases.
+
+## License
+
+[MIT](LICENSE)
+
+## Credits
+
+- Solana Foundation
+- Helius
+- Light Protocol
+
+---
+
+*For technical questions or support, please open an issue on this repository.*
+>>>>>>> 6702684d72dd2b07c46656e6c65dbf928666c45e

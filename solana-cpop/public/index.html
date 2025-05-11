@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solana cPOP - Proof of Participation</title>
+  <style>
+    :root {
+      --background: #f9fafb;
+      --foreground: #1f2937;
+      --primary: #4338ca;
+      --primary-foreground: white;
+      --muted: #9ca3af;
+      --border: #e5e7eb;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --background: #1f2937;
+        --foreground: #f9fafb;
+        --primary: #6366f1;
+        --primary-foreground: white;
+        --muted: #9ca3af;
+        --border: #374151;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--background);
+      color: var(--foreground);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 0;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    main {
+      min-height: calc(100vh - 160px);
+      padding: 2rem 0;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .subtitle {
+      font-size: 1.25rem;
+      color: var(--muted);
+      max-width: 800px;
+      margin: 0 auto 2rem;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .feature {
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+    }
+
+    .feature h2 {
+      font-size: 1.25rem;
+      margin-top: 0;
+      margin-bottom: 0.75rem;
+    }
+
+    .about {
+      max-width: 800px;
+      margin: 3rem auto;
+      text-align: center;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .button {
+      display: inline-block;
+      background-color: var(--primary);
+      color: var(--primary-foreground);
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      text-decoration: none;
+      font-weight: 500;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h2>cPOP</h2>
+    </div>
+  </header>
+
+  <main>
+    <div class="container center">
+      <h1>cPOP: Compressed Proof-of-Participation</h1>
+      <p class="subtitle">
+        A platform for creating and distributing compressed token proofs of participation
+        using ZK Compression on Solana.
+      </p>
+
+      <div class="features">
+        <div class="feature">
+          <h2>Create Events</h2>
+          <p>Create events and mint compressed tokens (cTokens) for participants</p>
+        </div>
+        <div class="feature">
+          <h2>Generate QR Codes</h2>
+          <p>Create unique QR codes for participants to scan and claim tokens</p>
+        </div>
+        <div class="feature">
+          <h2>ZK Verification</h2>
+          <p>Tokens are verified using zero-knowledge proofs for maximum efficiency</p>
+        </div>
+      </div>
+
+      <div class="about">
+        <h2>About ZK Compression</h2>
+        <p>
+          ZK Compression on Solana reduces state costs by orders of magnitude while
+          preserving security, performance, and composability of the blockchain.
+        </p>
+        <p>
+          Our platform demonstrates the power of ZK Compression by enabling scalable
+          token distribution for thousands of users at minimal cost.
+        </p>
+        <a href="https://github.com/solana-labs/solana-program-library/tree/master/account-compression" class="button">Learn More</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>© 2025 Solana cPOP - Built with ZK Compression</p>
+    </div>
+  </footer>
+</body>
+</html>
