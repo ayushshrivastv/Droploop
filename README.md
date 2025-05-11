@@ -1,19 +1,12 @@
 # Droploop: Decentralized Referral System
 
-A decentralized referral system built on Solana using ZK Compression with Light Protocol
+Droploop enables creators to build decentralized referral campaigns that reward users for inviting others to join their community. Through unique QR codes and referral links, users can easily share and track their referrals, with rewards automatically distributed as compressed tokens on the Solana blockchain.
 
-A powerful and cost-effective solution for creating and managing referral campaigns on the Solana blockchain through compressed tokens and the power of ZK compression technology.
+Built for the Best cPOP Interface track of the 1000x Hackathon, this application demonstrates how referral programs can leverage blockchain technology for transparency, cost-effectiveness, and scalability without compromising on user experience.
 
 **[Droploop Project](https://droploop-ten.vercel.app)**
 
 ![Screenshot 2025-05-11 at 7 02 22 AM](https://github.com/user-attachments/assets/f88b6e7f-a629-48c6-98ea-aa145f0ccd1c)
-
-
-## Overview
-
-Droploop enables creators to build decentralized referral campaigns that reward users for inviting others to join their community. Through unique QR codes and referral links, users can easily share and track their referrals, with rewards automatically distributed as compressed tokens on the Solana blockchain.
-
-Built for the Best cPOP Interface track of the 1000x Hackathon, this application demonstrates how referral programs can leverage blockchain technology for transparency, cost-effectiveness, and scalability without compromising on user experience.
 
 ## Referral System Workflow
 
@@ -24,6 +17,10 @@ Droploop uses Light Protocol's ZK Compression to make referral campaigns cost-ef
 Creators can connect their Solana wallet, initiate a referral campaign, and set the reward parameters for both referrers and new joiners. Upon creation, the system generates unique referral QR codes and links that can be distributed across various channels. Users can join through these referrals and earn rewards in the form of compressed tokens. All campaign statistics are tracked in real-time, giving creators full visibility into their referral program's performance.
 
 ## Solana Pay and Smart Contract Workflow
+
+A decentralized referral system built on Solana using ZK Compression with Light Protocol
+
+A powerful and cost effective solution for creating and managing referral campaigns on the Solana blockchain through compressed tokens and the power of ZK compression technology.
 
 ![Screenshot 2025-05-11 at 7 02 48 AM](https://github.com/user-attachments/assets/c4ae4a28-b219-458c-a0dc-ae11823205a7)
 
@@ -143,22 +140,6 @@ The application is deployed on Vercel. To deploy your own version:
    - `NEXT_PUBLIC_CLUSTER` (e.g., `devnet`)
    - `NEXT_PUBLIC_RPC_ENDPOINT` (e.g., `https://api.devnet.solana.com`)
 
-## License
-
-This project is licensed under the MIT License and is open for extension, experimentation, and contribution.
-
-## Special Thanks
-
-Gratitude to the teams behind Light Protocol and Solana for their exceptional infrastructure and tools. Additional thanks to the developers of Next.js, the creators of shadcn/ui, and the broader Solana community for their ongoing support and innovation.
-
----
-
-Crafted with care by Ayush Srivastava
-
-*Submission for the 1000x Hackathon - Best cPOP Interface Track*
-- **Token Verification**: Verify token ownership using zero-knowledge proofs
-- **Anti-Double-Claim Protection**: Security measures to prevent duplicate claims
-
 ## Setup and Installation
 
 ### Prerequisites
@@ -249,17 +230,11 @@ The Next.js frontend provides:
 
 This project was developed as part of the ZK Compression Track by Solana Foundation, Helius, and Light Protocol. It demonstrates the practical application of compressed accounts for NFT-like use cases.
 
+## Special Thanks
+
+Gratitude to the teams behind Light Protocol and Solana for their exceptional infrastructure and tools. Additional thanks to the developers of Next.js, the creators of shadcn/ui, and the broader Solana community for their ongoing support and innovation.
+
 ## License
 
-[MIT](LICENSE)
+This project is licensed under the MIT License and is open for extension, experimentation, and contribution [MIT](LICENSE).
 
-## Credits
-
-- Solana Foundation
-- Helius
-- Light Protocol
-
----
-
-*For technical questions or support, please open an issue on this repository.*
->>>>>>> 6702684d72dd2b07c46656e6c65dbf928666c45e
