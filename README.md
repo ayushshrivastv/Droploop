@@ -99,7 +99,7 @@ The architecture is designed for easy extensibility and is suitable for further 
 | Referral Verification Time | 2-5 seconds | 2-5 seconds | Equal UX |
 | Maximum Campaign Size | ~1,000 participants | 100,000+ participants | 100x scalability |
 
-For more in-depth technical details, refer to the [src/README.md](./src/README.md) file.
+For more in-depth technical details, refer to the [ARCHITECTURE.md](https://github.com/ayushshrivastv/Droploop/blob/main/ARCHITECTURE.md) file.
 
 ## Development Scripts
 
