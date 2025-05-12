@@ -12,8 +12,8 @@ interface ArticleLayoutProps {
 export const ArticleLayout: React.FC<ArticleLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
-      {/* Header */}
-      <header className="border-b border-gray-800">
+      {/* Header - changed to have transparent background and absolute positioning */}
+      <header className="absolute top-0 left-0 right-0 z-40 border-b border-gray-800/40 bg-black/10 backdrop-blur-sm">
         <div className="container max-w-5xl mx-auto px-4 py-6 flex justify-between items-center">
           <Link href={ROUTES.HOME} className="font-serif text-2xl font-medium text-white">
             Droploop
@@ -73,8 +73,8 @@ export const ArticleLayout: React.FC<ArticleLayoutProps> = ({ children }) => {
         </div>
       </div>
       
-      {/* Main content */}
-      <main className="flex-grow">
+      {/* Main content - removed padding to allow hero section to cover the full viewport */}
+      <main className="flex-grow relative">
         {children}
       </main>
       
@@ -110,7 +110,7 @@ export const ArticleLayout: React.FC<ArticleLayoutProps> = ({ children }) => {
                   </a>
                 </li>
                 <li>
-                  <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer" className="hover:text-white">
+                  <a href="https://github.com/ayushshrivastv/Droploop/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="hover:text-white">
                     MIT License
                   </a>
                 </li>
@@ -121,7 +121,7 @@ export const ArticleLayout: React.FC<ArticleLayoutProps> = ({ children }) => {
             <div>
               <h3 className="font-serif text-lg font-medium mb-4 text-white">Connect</h3>
               <div className="flex space-x-4">
-                <a href="https://x.com/ayushshrivastv" target="_blank" rel="noopener noreferrer" aria-label="X">
+                <a href="https://x.com/ayushsrivastv" target="_blank" rel="noopener noreferrer" aria-label="X">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" className="text-gray-400 hover:text-white">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" fill="currentColor"/>
                   </svg>
