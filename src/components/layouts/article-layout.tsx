@@ -79,46 +79,67 @@ export const ArticleLayout: React.FC<ArticleLayoutProps> = ({ children }) => {
       </main>
       
       {/* Footer */}
-      <footer className="border-t border-gray-800 py-12 mt-12">
+      <footer className="border-t border-gray-800 py-8 mt-12">
         <div className="container max-w-5xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Left column */}
             <div>
-              <h3 className="font-serif text-lg font-medium mb-4 text-white">Droploop</h3>
-              <p className="text-white mb-4">
-                A decentralized referral system on Solana using ZK Compression with Light Protocol.
+              <h2 className="font-serif text-xl font-medium mb-4 text-white">Droploop</h2>
+              <p className="text-gray-400 text-sm mb-4">
+                High throughput token issuance and distribution platform powered by Light Protocol's state compression technology.
               </p>
             </div>
             
+            {/* Middle column */}
             <div>
-              <h3 className="font-serif text-lg font-medium mb-4 text-white">Links</h3>
-              <ul className="space-y-2">
+              <h3 className="font-serif text-lg font-medium mb-4 text-white">Resources</h3>
+              <ul className="space-y-2 text-gray-400 text-sm">
                 <li>
-                  <Link href={ROUTES.HOME} className="text-white hover:text-white">
-                    Home
-                  </Link>
+                  <a href="https://solana.com" target="_blank" rel="noopener noreferrer" className="hover:text-white">
+                    Solana
+                  </a>
                 </li>
                 <li>
-                  <Link href={ROUTES.MINT} className="text-white hover:text-white">
-                    Create Campaign
-                  </Link>
+                  <a href="https://lightprotocol.com" target="_blank" rel="noopener noreferrer" className="hover:text-white">
+                    Light Protocol
+                  </a>
                 </li>
                 <li>
-                  <Link href={ROUTES.CLAIM} className="text-white hover:text-white">
-                    Claim Referral
-                  </Link>
+                  <a href="https://solana.pay" target="_blank" rel="noopener noreferrer" className="hover:text-white">
+                    Solana Pay
+                  </a>
+                </li>
+                <li>
+                  <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer" className="hover:text-white">
+                    MIT License
+                  </a>
                 </li>
               </ul>
             </div>
             
+            {/* Right column */}
             <div>
-              <h3 className="font-serif text-lg font-medium mb-4 text-white">About</h3>
-              <p className="text-white mb-4">
-                Built for the 1000x Hackathon ZK Compression Track.
-              </p>
-              <p className="text-white">
-                © 2025 Droploop
-              </p>
+              <h3 className="font-serif text-lg font-medium mb-4 text-white">Connect</h3>
+              <div className="flex space-x-4">
+                <a href="https://x.com/ayushshrivastv" target="_blank" rel="noopener noreferrer" aria-label="X">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" className="text-gray-400 hover:text-white">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" fill="currentColor"/>
+                  </svg>
+                </a>
+                <a href="https://www.linkedin.com/in/ayushshrivastv/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 hover:text-white">
+                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                    <rect x="2" y="9" width="4" height="12"></rect>
+                    <circle cx="4" cy="4" r="2"></circle>
+                  </svg>
+                </a>
+              </div>
             </div>
+          </div>
+          
+          {/* Copyright line */}
+          <div className="text-center mt-8 pt-4 border-t border-gray-800">
+            <p className="text-gray-400 text-sm">© 2025 Ayush Srivastava</p>
           </div>
         </div>
       </footer>

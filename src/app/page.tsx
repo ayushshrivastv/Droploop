@@ -10,7 +10,7 @@ export default function Home() {
   return (
     <ArticleLayout>
       {/* Hero Section */}
-      <section className="min-h-screen flex items-center justify-center border-b border-gray-800">
+      <section className="min-h-screen flex items-center justify-center">
         <div className="container max-w-3xl mx-auto px-4 py-24">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -23,11 +23,15 @@ export default function Home() {
               A decentralized referral system on Solana using ZK Compression with Light Protocol.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Button asChild className="bg-white text-black hover:bg-gray-200 rounded-none">
-                <Link href={`${ROUTES.MINT}?tab=campaign`}>Create Referral</Link>
+              <Button asChild className="bg-white text-black hover:bg-gray-200 rounded-full px-8 py-6 text-lg font-medium">
+                <Link href={`${ROUTES.MINT}?tab=campaign`} className="flex items-center">
+                  Create Referral <span className="ml-2">→</span>
+                </Link>
               </Button>
-              <Button asChild className="bg-white text-black hover:bg-gray-200 rounded-none">
-                <Link href={ROUTES.CLAIM}>Claim Referral</Link>
+              <Button asChild className="bg-transparent text-white hover:bg-gray-900 border border-white rounded-full px-8 py-6 text-lg font-medium">
+                <Link href={ROUTES.CLAIM} className="flex items-center">
+                  Claim Token <span className="ml-2">→</span>
+                </Link>
               </Button>
             </div>
           </motion.div>
