@@ -1,0 +1,9 @@
+# SOLANA TEST KEYPAIR - DO NOT SHARE OR COMMIT TO GIT
+# Created: 2025-05-12T05:05:50.132Z
+
+PUBLIC_KEY=3XmjmBoda95RLEgezDP4S6vtrJsSUw8xu1MfRPW1sC5i
+PRIVATE_KEY_BASE58=4y7eXRhJacmDepjgqr5zV91S1wq5iNQcaZL7QpixUHBGW64PMtDpVoFSRHoiyArhBihYc3Upw99bMoAFG65gbPgY
+
+# Instructions:
+# 1. Fund this wallet: solana airdrop 2 3XmjmBoda95RLEgezDP4S6vtrJsSUw8xu1MfRPW1sC5i --url https://api.devnet.solana.com
+# 2. Add to .env.local: NEXT_PUBLIC_ADMIN_PRIVATE_KEY=4y7eXRhJacmDepjgqr5zV91S1wq5iNQcaZL7QpixUHBGW64PMtDpVoFSRHoiyArhBihYc3Upw99bMoAFG65gbPgY

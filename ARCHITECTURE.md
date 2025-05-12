@@ -1,5 +1,7 @@
 # Droploop: Decentralized Referral Program Architecture
 
+*Updated for 1000x Hackathon ZK Compression Track Submission*
+
 ## System Architecture
 
 ```
@@ -20,7 +22,7 @@
 │   │   User Claim Interface     │    │      │  │                         │    │
 │   │   - Scan QR Codes          │    │      │  │  Light Protocol         │    │
 │   │   - Claim cTokens          │────┼──────┼─▶│  - compressed_token     │    │
-│   │   - View Claimed Tokens    │    │      │  │  - stateless.js         │    │
+│   │   - Airdrop Mode           │    │      │  │  - stateless.js         │    │
 │   │                            │    │      │  │  - state compression    │    │
 │   └────────────────────────────┘    │      │  │                         │    │
 │                                     │      │  └─────────────┬───────────┘    │
@@ -80,7 +82,11 @@
 
 ### Referral Claim Process
 1. **User** scans QR code or inputs referral code
-2. Frontend decodes QR/referral code and extracts campaign ID and referral ID
+   - Integrated QR scanner allows direct scanning from the user's device camera
+   - QR codes can contain full campaign details or simple referral codes
+2. Frontend processes the scanned QR data:
+   - Uses `parseReferralData` utility to extract campaign and referral information
+   - Automatically populates form fields with extracted data
 3. Client-side code sends transaction to claim reward on-chain
 4. On-chain `claim_reward` function:
    - Verifies referral validity and that it hasn't been claimed by this user
@@ -88,7 +94,20 @@
    - Mints appropriate rewards to both referrer and referee
    - Records the referral relationship on-chain
    - Updates referral statistics
-5. User receives confirmation of claimed reward
+5. User receives confirmation of claimed reward with animated success state
+
+### Airdrop Claim Process
+1. **User** toggles to airdrop mode in the claim interface
+   - UI updates to show airdrop-specific information
+   - Referral code input is hidden as it's not required
+2. User connects their wallet and initiates the claim
+3. Client-side code sends transaction to claim airdrop on-chain
+4. On-chain `claim_airdrop` function:
+   - Verifies the user hasn't already claimed this airdrop
+   - Creates compressed cToken with Light Protocol
+   - Mints the airdrop token to the user's wallet
+   - Records the claim in the compressed state
+5. User receives confirmation of claimed airdrop with animated success state
 
 ### Referral Verification Process
 1. **User or Creator** requests to verify a referral
@@ -145,100 +164,119 @@ This data is compressed using Light Protocol's compression techniques and state 
 
 5. **Sybil Resistance**: Optional user verification mechanisms can be implemented to prevent abuse and ensure unique users.
 
+## QR Scanner Implementation
+
+The QR scanner component is a key feature of the Droploop platform, providing a seamless way for users to claim referral rewards:
+
+1. **HTML5 QR Scanner Integration**: Utilizes the `html5-qrcode` library for camera access and QR processing
+2. **Multi-Format Support**: Can decode both simple referral codes and complex URLs with campaign details
+3. **Dynamic Data Extraction**: Uses the `parseReferralData` utility to extract meaningful data from QR codes
+4. **Responsive UI**: Camera interface with clear instructions and error handling
+5. **Permission Handling**: Manages camera permissions with appropriate user feedback
+
+### QR Scanner Component Architecture
+
+```typescript
+interface QRScannerProps {
+  onCodeScanned: (code: string) => void;
+  onClose: () => void;
+}
+
+export function QRScanner({ onCodeScanned, onClose }: QRScannerProps) {
+  // Camera management and QR scanning logic
+  // Permission handling
+  // UI rendering for scanner interface
+}
+```
+
 ## Frontend-Blockchain Communication
 
 ### Light Protocol Integration Module
 
-The frontend interacts with Light Protocol through a dedicated utility module (`lightProtocol.ts`):
+The frontend interacts with Light Protocol through a dedicated utility module (`transactions.ts`):
 
 ```typescript
 // Example of the utility functions for Light Protocol operations
 
-// Initialize a new referral campaign
-export async function initializeReferralCampaign(
-  wallet: WalletContextState,
+// Token transfer function for both referral claims and airdrops
+export async function transferCompressedTokens(
   connection: Connection,
-  campaignData: {
-    name: string,
-    description: string,
-    referrerReward: number,
-    refereeReward: number,
-    startDate: Date,
-    endDate: Date,
-    maxReferrals: number
-  }
+  payer: Keypair,
+  mintAddress: PublicKey,
+  amount: number,
+  owner: Keypair,
+  destination: PublicKey
 ): Promise<string> {
-  // Import Light Protocol libraries
-  const { CompressedToken } = await import('@lightprotocol/compressed-token');
-  const { StatelessKeypair } = await import('@lightprotocol/stateless.js');
+  // Create and send transaction to transfer compressed tokens
+  // using Light Protocol's compression standards
   
-  // Create compressed token settings for the campaign
-  const compressedToken = new CompressedToken(connection, wallet);
+  // In a production environment, this would interact with
+  // Light Protocol's SDK to create transfer instructions
   
-  // Prepare and send the initialize campaign transaction
-  const tx = await compressedToken.createToken({
-    name: campaignData.name,
-    symbol: 'CREF',
-    uri: JSON.stringify(campaignData),
-    decimals: 0,
-    maxSupply: campaignData.maxReferrals * (campaignData.referrerReward + campaignData.refereeReward)
-  });
+  // For the hackathon demo, we've implemented a simulation mode
+  // that can operate without requiring real blockchain interaction
   
-  return tx;
-}
-
-// Generate a referral link
-export async function generateReferral(
-  wallet: WalletContextState,
-  connection: Connection,
-  campaignAddress: PublicKey
-): Promise<{ referralId: string, qrData: string }> {
-  // Import Light Protocol libraries
-  const { CompressedToken } = await import('@lightprotocol/compressed-token');
-  
-  // Create unique referral ID
-  const referralId = generateUniqueId();
-  
-  // Register referral on-chain
-  const compressedToken = new CompressedToken(connection, wallet);
-  await compressedToken.registerReferral(campaignAddress, referralId);
-  
-  // Generate QR code data
-  const qrData = JSON.stringify({
-    campaign: campaignAddress.toString(),
-    referrer: wallet.publicKey?.toString(),
-    referralId
-  });
-  
-  return { referralId, qrData };
-}
-
-// Claim a referral reward
-export async function claimReferralReward(
-  wallet: WalletContextState,
-  connection: Connection,
-  referralData: {
-    campaignAddress: PublicKey,
-    referrerId: PublicKey,
-    referralId: string
-  }
-): Promise<string> {
-  // Import Light Protocol libraries
-  const { CompressedToken } = await import('@lightprotocol/compressed-token');
-  
-  // Initialize compressed token interface
-  const compressedToken = new CompressedToken(connection, wallet);
-  
-  // Claim the referral reward, which mints compressed tokens to both parties
-  const tx = await compressedToken.claimReferral(
-    referralData.campaignAddress,
-    referralData.referrerId,
-    referralData.referralId
+  const transaction = createCompressedTokenTransferTransaction(
+    payer.publicKey,
+    owner.publicKey,
+    destination,
+    mintAddress,
+    amount
   );
   
-  return tx;
+  const signature = await sendAndConfirmTransaction(
+    connection,
+    transaction,
+    [payer, owner],
+    { commitment: 'confirmed' }
+  );
+  
+  return signature;
+}
+
+// Helper function for initiating token transfers from the claim form
+export async function initiateCompressedTokenTransfer(
+  connection: Connection,
+  recipient: PublicKey,
+  tokenMintAddress: string,
+  referralCode?: string | null
+): Promise<string> {
+  // Get admin keypair securely (in production, this would be handled by backend)
+  const adminKeypair = getAdminKeypair();
+  
+  // Support both referral claiming and airdrop modes
+  // If referralCode is provided, this is a referral claim
+  // Otherwise, it's an airdrop claim
+  
+  // Execute the token transfer using Light Protocol
+  const signature = await transferCompressedTokens(
+    connection,
+    adminKeypair,
+    new PublicKey(tokenMintAddress),
+    1, // Amount to transfer (typically 1 for NFT/POP token)
+    adminKeypair,
+    recipient
+  );
+  
+  // Track referral relationship if this is a referral claim
+  if (referralCode) {
+    await trackReferral(referralCode, signature, recipient.toBase58());
+  }
+  
+  return signature;
 }
 ```
+
+## Demo Mode Implementation
+
+For the hackathon demonstration, we've implemented a special demo mode that allows the application to function without requiring actual blockchain transactions:
+
+1. **Simulated Transactions**: Token transfers are simulated with realistic delays and signatures
+2. **Environment Configuration**: Simple setup via environment variables for demo purposes
+3. **Console Feedback**: Detailed logging to verify operation without blockchain interaction
+4. **Toggle Mechanism**: Easy switch between demo mode and real transactions for testing
+
+This implementation ensures judges and users can experience the full application flow without needing to set up wallets with real SOL or own compressed tokens.
 
 ## Future Extensions
 

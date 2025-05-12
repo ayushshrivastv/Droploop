@@ -1,0 +1,12 @@
+# Environment variables for Droploop
+# SECURITY WARNING: Don't commit this file to git
+
+# Admin wallet private key (Base58 encoded)
+# This is used for signing token transfer transactions
+NEXT_PUBLIC_ADMIN_PRIVATE_KEY=5MaiiCavjCmn9Hs1o3eznqDEhRwxo7pXiAYez7keQUviUkauRiTMD8DrESdrNjibTfPEpmffWQMpWydnELTNBncY
+
+# Mint address for the airdrop tokens
+NEXT_PUBLIC_AIRDROP_MINT_ADDRESS=TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
+
+# Solana RPC endpoint (defaults to devnet if not specified)
+NEXT_PUBLIC_RPC_ENDPOINT=https://api.devnet.solana.com

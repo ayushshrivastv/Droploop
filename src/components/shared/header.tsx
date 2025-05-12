@@ -40,7 +40,7 @@ export const Header: FC<HeaderProps> = ({ activePage }) => {
             href={ROUTES.CLAIM}
             className={`text-sm font-medium transition-colors hover:text-primary ${activePage === ROUTES.CLAIM ? 'text-foreground' : 'text-muted-foreground'}`}
           >
-            Join Referral
+            Claim Referral
           </Link>
         </nav>
 
@@ -89,7 +89,7 @@ export const Header: FC<HeaderProps> = ({ activePage }) => {
               className={`text-sm font-medium transition-colors hover:text-primary ${activePage === ROUTES.CLAIM ? 'text-foreground' : 'text-muted-foreground'}`}
               onClick={() => setMobileMenuOpen(false)}
             >
-              Join Referral
+              Claim Referral
             </Link>
           </nav>
           <div className="flex items-center justify-between pt-4 border-t border-border/40">

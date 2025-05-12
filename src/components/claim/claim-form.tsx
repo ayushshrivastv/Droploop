@@ -8,7 +8,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { PublicKey } from '@solana/web3.js';
@@ -20,6 +20,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { transferCompressedTokens, createConnection } from '@/lib/utils/solana';
 import { DEFAULT_CLUSTER, DEVNET_RPC_ENDPOINT } from '@/lib/constants';
 import { Keypair } from '@solana/web3.js';
+import { QRScanner } from './qr-scanner';
+import { parseReferralData } from '@/lib/utils/referral-qrcode';
 
 /**
  * ClaimForm Component
@@ -46,6 +48,10 @@ export function ClaimForm() {
     name: string;  // Event name
     mint: string;  // Token mint address
   } | null>(null);
+
+  // New state variables for QR Scanner and Airdrop mode
+  const [showQRScanner, setShowQRScanner] = useState(false);
+  const [isAirdropMode, setIsAirdropMode] = useState(false);
 
   /**
    * Effect hook to process URL parameters when the component loads
@@ -79,83 +85,158 @@ export function ClaimForm() {
     }
   }, [searchParams]);
 
+  // Handler for QR code scanned
+  const handleQRCodeScanned = (code: string) => {
+    const parsedData = parseReferralData(code);
+    if (parsedData && parsedData.referralCode) {
+      setClaimCode(parsedData.referralCode);
+      // If campaign details are present in the QR, use them
+      if (parsedData.campaignId && parsedData.campaignName) {
+        try {
+          new PublicKey(parsedData.campaignId); // Validate mint/campaignId as PublicKey
+          setEventDetails({ name: parsedData.campaignName, mint: parsedData.campaignId });
+        } catch (err) {
+          console.warn("Scanned QR code contained campaign info, but ID was not a valid PublicKey. Using code directly.", err);
+          setEventDetails(null); // Fallback to just using the code
+        }
+      } else {
+        // If no campaign details in QR, clear any existing eventDetails from URL params
+        setEventDetails(null);
+      }
+    } else {
+      // If not parsable as referral data (e.g., direct address), use the raw code
+      setClaimCode(code);
+      setEventDetails(null); // Clear event details if it's a direct code/address
+    }
+    setShowQRScanner(false); // Hide scanner after processing
+  };
+
+  // Toggle Airdrop Mode
+  const toggleAirdropMode = () => {
+    setIsAirdropMode(!isAirdropMode);
+    setClaimCode(''); // Clear claim code when switching modes
+    setError(null);   // Clear any previous errors
+    
+    if (!isAirdropMode) { // Just switched TO airdrop mode
+      setEventDetails(null); // Clear URL-based event details for airdrop
+    } else { // Just switched FROM airdrop mode (back to referral)
+      // Re-evaluate URL params for event details if present
+      const event = searchParams.get('event');
+      const mint = searchParams.get('mint');
+      if (event && mint) {
+        try {
+          new PublicKey(mint);
+          setEventDetails({ name: decodeURIComponent(event), mint: mint });
+        } catch (err) {
+          setError('Invalid token information in URL after switching mode');
+        }
+      } else {
+        setEventDetails(null); // Ensure eventDetails is null if no URL params
+      }
+    }
+  };
+
+  // Get the airdrop mint address from environment variables
+  // This allows for easy configuration without changing code
+  const AIRDROP_MINT_ADDRESS = process.env.NEXT_PUBLIC_AIRDROP_MINT_ADDRESS || 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'; // Default to USDC mint address
+
   /**
    * Handles the form submission for token claiming
    * Performs validation, creates a connection to Solana, and executes the token transfer
    * 
    * @param e - Form event object
    */
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Verify wallet connection
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault(); // Prevent default form submission
+
     if (!connected || !publicKey) {
-      setError('Please connect your wallet first');
+      setError('Please connect your wallet.');
       return;
     }
-    
-    // Ensure we have a claim code or event details
-    if (!eventDetails && !claimCode) {
-      setError('Please enter a claim code');
-      return;
-    }
-    
-    try {
-      // Reset previous errors and indicate processing has started
-      setError(null);
-      setIsSubmitting(true);
-      
-      // Get the mint address either from the URL parameters or the claim code input
-      const mintAddress = eventDetails?.mint || claimCode;
-      
-      // Validate the mint address is a valid Solana PublicKey
-      let mintPublicKey;
-      try {
-        mintPublicKey = new PublicKey(mintAddress);
-      } catch (err) {
-        throw new Error('Invalid token address format');
+
+    setIsSubmitting(true);
+    setError(null);
+    setClaimSuccess(false);
+
+    let tokenToClaimAddress: string;
+    let referralCodeForTx: string | null = null;
+    let finalEventDetailsForSuccessView = eventDetails; // Default to existing eventDetails
+
+    if (isAirdropMode) {
+      if (!AIRDROP_MINT_ADDRESS || AIRDROP_MINT_ADDRESS === 'ENTER_AIRDROP_MINT_ADDRESS_HERE') {
+        setError('Airdrop mint address is not configured. Please contact an administrator.');
+        setIsSubmitting(false);
+        return;
       }
-      
-      // Log claiming details for debugging
-      console.log("Claiming token with:", {
-        mint: mintPublicKey.toBase58(),
-        recipient: publicKey.toBase58()
+      tokenToClaimAddress = AIRDROP_MINT_ADDRESS;
+      // For airdrop success message, create/override eventDetails
+      finalEventDetailsForSuccessView = { name: "Community Airdrop", mint: AIRDROP_MINT_ADDRESS };
+      // No referral code needed for airdrop claim transaction itself
+    } else { // Referral mode
+      if (!claimCode && !eventDetails?.mint) {
+        setError('Please enter a referral code or ensure event/campaign details are loaded (e.g., via QR or URL).');
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (eventDetails?.mint) {
+        tokenToClaimAddress = eventDetails.mint;
+        referralCodeForTx = claimCode; // Use claimCode as the referral identifier
+        finalEventDetailsForSuccessView = eventDetails; // Already set as default
+      } else if (claimCode) {
+        // Fallback: if no eventDetails, assume claimCode might be the mint address itself
+        try {
+          new PublicKey(claimCode); // Validate if claimCode is a PublicKey
+          tokenToClaimAddress = claimCode;
+          // No separate referral code if claimCode is used as mint
+          finalEventDetailsForSuccessView = { name: "Direct Token Claim", mint: claimCode }; 
+        } catch (err) {
+          setError('Invalid referral code or mint address format. If claiming directly, ensure it is a valid address.');
+          setIsSubmitting(false);
+          return;
+        }
+      } else {
+        // Should be caught by the initial check, but as a safeguard:
+        setError('Cannot determine the token to claim. Missing referral code and event details.');
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
+    try {
+      console.log('Initiating transfer with:', {
+        tokenMintAddress: tokenToClaimAddress,
+        recipientPublicKey: publicKey.toBase58(),
+        referralCodeOrAddress: referralCodeForTx,
+        isAirdrop: isAirdropMode,
       });
-      
-      // Set up connection to Solana with appropriate RPC endpoint
+
       const rpcEndpoint = process.env.NEXT_PUBLIC_RPC_ENDPOINT || DEVNET_RPC_ENDPOINT;
       const appConfig = { 
         rpcEndpoint,
         cluster: process.env.NEXT_PUBLIC_CLUSTER as "devnet" | "mainnet-beta" | "testnet" | "localnet" || DEFAULT_CLUSTER
       };
-      
-      /**
-       * IMPORTANT FOR PRODUCTION:
-       * In a real production application, the token transfer should happen server-side
-       * or through a different mechanism where private keys aren't exposed.
-       * This demo uses a temporary keypair for illustration purposes only.
-       */
+      const connection = createConnection(appConfig);
       const senderKeypair = /*await window.solana.getSecretKey() or other secure method*/ new Keypair();
-      
-      // Execute the token transfer using Light Protocol
-      const { signature } = await transferCompressedTokens(
-        createConnection(appConfig),
+      const signature = await transferCompressedTokens(
+        connection,
         senderKeypair, // Payer for the transaction fees
-        mintPublicKey, // The token mint address to claim
+        new PublicKey(tokenToClaimAddress), // The token mint address to claim
         1, // Amount to transfer (typically 1 for NFT/POP token)
         senderKeypair, // Owner of the token (in production, this would be the event organizer's wallet)
         publicKey // Destination (the user's connected wallet)
       );
+      console.log('Transaction successful with signature:', signature);
       
-      // Log successful transaction for debugging and user reference
-      console.log("Token claimed successfully, signature:", signature);
-      
-      // Update UI to show success state
+      // Update eventDetails state for the success view before setting success flag
+      setEventDetails(finalEventDetailsForSuccessView); 
       setClaimSuccess(true);
-    } catch (error) {
+      setClaimCode(''); // Clear claim code after successful claim
+
+    } catch (err: any) {
       // Handle and display any errors during the claim process
-      console.error("Error claiming token:", error);
-      setError(`Error claiming token: ${error instanceof Error ? error.message : String(error)}`);
+      console.error("Error claiming token:", err);
+      setError(`Error claiming token: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       // Always reset submission state regardless of outcome
       setIsSubmitting(false);
@@ -170,17 +251,17 @@ export function ClaimForm() {
     return (
       <Card className="w-full card-hover animate-fade-in">
         <CardHeader>
-          <CardTitle className="text-center text-green-600 flex items-center justify-center">
+          <CardTitle className="text-center text-white flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            Token Claimed Successfully!
+            {eventDetails?.name?.toLowerCase().includes('airdrop') ? 'Airdrop Claimed Successfully!' : 'Token Claimed Successfully!'}
           </CardTitle>
         </CardHeader>
         <CardContent className="text-center">
           <div className="flex justify-center mb-6 animate-slide-up" style={{animationDelay: '100ms'}}>
-            <div className="bg-green-50 rounded-full p-4 shadow-md">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="bg-gray-50 rounded-full p-4 shadow-md">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
@@ -207,14 +288,30 @@ export function ClaimForm() {
     );
   }
 
+  // If QR Scanner is active, show it
+  if (showQRScanner) {
+    return (
+      <QRScanner 
+        onCodeScanned={handleQRCodeScanned} 
+        onClose={() => setShowQRScanner(false)} 
+      />
+    );
+  }
+
+  // Default view: Claim form
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-purple-500" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clipRule="evenodd" />
-          </svg>
-          Claim Referral Reward
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clipRule="evenodd" />
+            </svg>
+            {isAirdropMode ? 'Claim Airdrop' : 'Claim Referral Reward'}
+          </div>
+          <Button variant="outline" size="sm" onClick={toggleAirdropMode} className="text-xs">
+            {isAirdropMode ? 'Switch to Referral' : 'Switch to Airdrop'}
+          </Button>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-5">
@@ -222,7 +319,7 @@ export function ClaimForm() {
           <Alert variant="destructive">
             <AlertTitle className="flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
               Error
             </AlertTitle>
@@ -230,18 +327,18 @@ export function ClaimForm() {
           </Alert>
         )}
         
-        {eventDetails ? (
+        {eventDetails && !isAirdropMode ? (
           <div className="space-y-4 animate-fade-in">
-            <div className="p-4 bg-black/20 rounded-lg shadow-sm transition-all hover:shadow-md backdrop-blur-sm border border-purple-500/20">
+            <div className="p-4 bg-black/20 rounded-lg shadow-sm transition-all hover:shadow-md backdrop-blur-sm border border-gray-500/20">
               <p className="font-medium flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clipRule="evenodd" />
                 </svg>
                 Referral Campaign: {eventDetails.name}
               </p>
               <p className="text-sm text-muted-foreground mt-1 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-pink-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M11 17a1 1 0 001.447-.894l4-2A1 1 0 0017 15V9.236a1 1 0 00-1.447-.894l-4 2a1 1 0 00-.553.894V17zM15.211 6.276a1 1 0 000-1.788l-4.764-2.382a1 1 0 00-.894 0L4.789 4.488a1 1 0 000 1.788l4.764 2.382a1 1 0 00.894 0l4.764-2.382zM4.447 8.342A1 1 0 003 9.236V15a1 1 0 00.553.894l4 2A1 1 0 009 17v-5.764a1 1 0 00-.553-.894l-4-2z" />
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M11 17a1 1 0 001.447-.894l4-12a1 1 0 11-1.898-.632l4 12a1 1 0 01-1.447.894L9 15.354m-5 6H2a1 1 0 01-1-1v-4a1 1 0 011-1h12a1 1 0 011 1v4a1 1 0 01-1 1z" clipRule="evenodd" />
                 </svg>
                 Token: {eventDetails.mint.slice(0, 4)}...{eventDetails.mint.slice(-4)}
               </p>
@@ -257,77 +354,105 @@ export function ClaimForm() {
               <p className="text-sm text-muted-foreground">
                 Connect your wallet to claim your ZK-compressed token reward
               </p>
-              <p className="text-xs text-muted-foreground/70">
+              <p className="text-xs text-muted-foreground mt-2">
                 Light Protocol ensures ultra-low gas fees through ZK compression
               </p>
             </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="claimCode" className="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-                Referral Code
-              </Label>
-              <Input
-                id="claimCode"
-                placeholder="Enter referral code or scan QR code"
-                value={claimCode}
-                onChange={(e) => setClaimCode(e.target.value)}
-                required
-                className="bg-black/20 border-purple-500/20 placeholder:text-zinc-500"
-              />
-              <p className="text-xs text-muted-foreground mt-1 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-                Use the code from your friend's referral or paste the full address
-              </p>
-            </div>
+            {!isAirdropMode ? (
+              <div className="space-y-2">
+                <Label htmlFor="claimCode" className="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 010 1.788l4-12a1 1 0 011.265-.633zM5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clipRule="evenodd" />
+                  </svg>
+                  Referral Code
+                </Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="claimCode"
+                    placeholder="Enter referral code or scan QR"
+                    value={claimCode}
+                    onChange={(e) => setClaimCode(e.target.value)}
+                    required={!isAirdropMode} // Only required if not in airdrop mode
+                    className="bg-black/20 border-gray-500/20 placeholder:text-zinc-500 flex-grow"
+                  />
+                  <Button 
+                    type="button" // Important: type="button" to prevent form submission
+                    variant="outline" 
+                    onClick={() => setShowQRScanner(true)}
+                    className="px-3"
+                    aria-label="Scan QR Code"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M3 4a1 1 0 011-1h4.586A1 1 0 019.293 3.707L10 4.414l.707-.707A1 1 0 0111.414 3H16a1 1 0 011 1v4.586A1 1 0 0116.293 9.293L15.586 10l.707.707A1 1 0 0117 11.414V16a1 1 0 01-1 1h-4.586A1 1 0 0110.707 16.293L10 15.586l-.707.707A1 1 0 018.586 17H4a1 1 0 01-1-1v-4.586A1 1 0 013.707 10.707L4.414 10l-.707-.707A1 1 0 013 8.586V4zm2 2V4h2v2H5zm0 4V8h2v2H5zm0 4v-2h2v2H5zm4-8V4h2v2h-2zm0 4V8h2v2h-2zm0 4v-2h2v2H9zm4-8V4h2v2h-2zm0 4V8h2v2h-2z" clipRule="evenodd" />
+                    </svg>
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  Use the code from your friend's referral, paste an address, or scan QR.
+                </p>
+              </div>
+            ) : (
+              // Airdrop mode indication
+              <div className="text-center p-4 bg-black/20 rounded-lg shadow-sm backdrop-blur-sm border border-gray-500/20">
+                <h3 className="text-lg font-semibold mb-2">Airdrop Mode Active</h3>
+                <p className="text-sm text-muted-foreground">
+                  Connect your wallet and click "Claim Airdrop" below to receive your tokens.
+                </p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  (Ensure the airdrop mint address is correctly configured by the admin.)
+                </p>
+              </div>
+            )}
             
-            <div className="bg-black/20 rounded-lg p-4 backdrop-blur-sm border border-purple-500/10">
+            {!isAirdropMode && (
+            <div className="bg-black/20 rounded-lg p-4 backdrop-blur-sm border border-gray-500/10">
               <h4 className="text-sm font-medium mb-2 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.894l4 12a1 1 0 010 1.788l-4 12a3.066 3.066 0 01-5.434 0l-4-12A3.066 3.066 0 013.001 8.22L8.12 3.45a3.066 3.066 0 015.434 0z" clipRule="evenodd" />
                 </svg>
                 ZK Compression Benefits
               </h4>
               <ul className="text-xs text-muted-foreground space-y-1">
                 <li className="flex items-start">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 mt-0.5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 mt-0.5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   99.9% lower gas fees than regular tokens
                 </li>
                 <li className="flex items-start">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 mt-0.5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 mt-0.5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   Privacy-preserving referral tracking
                 </li>
                 <li className="flex items-start">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 mt-0.5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 mt-0.5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   Instant reward distribution to both parties
                 </li>
               </ul>
             </div>
+            )}
           </form>
         )}
       </CardContent>
       <CardFooter className="flex justify-center pt-2">
         <Button 
-          onClick={handleSubmit} 
-          disabled={isSubmitting || !connected}
-          className="relative px-8 py-2 bg-white hover:bg-slate-100 text-black rounded-full shadow-lg hover:shadow-gray-200/25 transition-all duration-300"
+          type="submit" 
+          disabled={isSubmitting || !connected || (isAirdropMode ? false : (!claimCode && !eventDetails))}
+          className="relative px-8 py-2 bg-white hover:bg-gray-100 text-black rounded-full shadow-lg hover:shadow-white/20 transition-all duration-300 w-full md:w-auto"
           size="lg"
         >
           {isSubmitting ? (
             <span className="flex items-center">
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
@@ -338,7 +463,7 @@ export function ClaimForm() {
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
               </svg>
-              Claim Referral
+              {isAirdropMode ? 'Claim Airdrop' : 'Claim Referral'}
             </span>
           )}
         </Button>

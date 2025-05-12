@@ -12,7 +12,7 @@ interface AppleLayoutProps {
 const navItems = [
   { label: 'Home', href: ROUTES.HOME },
   { label: 'Create Campaign', href: ROUTES.MINT },
-  { label: 'Join Referral', href: ROUTES.CLAIM },
+  { label: 'Claim Referral', href: ROUTES.CLAIM },
 ];
 
 export const AppleLayout: React.FC<AppleLayoutProps> = ({ children }) => {

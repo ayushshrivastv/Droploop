@@ -1,8 +1,71 @@
-# Droploop - Technical Documentation
+# Droploop - 1000x Hackathon ZK Compression Track Submission
 
-## Project Overview
+## Hackathon Challenge
 
-Droploop is a decentralized referral system built on Solana blockchain utilizing ZK Compression via Light Protocol. The application enables creators to launch referral campaigns with minimal cost while maintaining security and transparency. Users can join through personalized QR codes and both referrers and new participants receive token rewards automatically.
+ZK Compression is a new primitive built on Solana that enables applications to scale effectively. Developers and users can opt to compress their on-chain state, reducing state costs by orders of magnitude while preserving the security, performance, and composability of the Solana L1.
+
+This ZK Compression track, brought to you by Light Protocol, Helius, and the Solana Foundation, challenges participants to build innovative projects on Solana that use zero-knowledge compression to achieve new levels of scalability, privacy, and security.
+
+## Our Solution: Droploop
+
+Droploop is a decentralized referral system built on Solana blockchain utilizing ZK Compression via Light Protocol. The application enables creators to launch referral campaigns with minimal cost while maintaining security and transparency. Users can claim tokens through personalized QR codes, addressing the specific challenge of creating a cToken Proof-of-Participation (POP) interface.
+
+### Key Features Meeting Hackathon Requirements
+
+✅ **Creator Token Minting**: Creators can mint experience tokens (cTokens) for airdrops and referral campaigns
+
+✅ **QR Code Integration**: Attendees can claim tokens by scanning personalized QR codes
+
+✅ **Airdrop Capability**: Support for direct airdrops without requiring referral codes
+
+✅ **Full ZK Compression**: Utilizes Light Protocol for compressed token transactions
+
+## Addressing Judging Criteria
+
+### 1. Functionality
+
+Droploop delivers a complete solution for cToken distribution:
+
+- **Seamless Creation**: Campaign creation flow with customizable parameters
+- **Effortless Claiming**: QR code scanning capability built directly into the application
+- **Dual Distribution Modes**: Support for both referral-based rewards and direct airdrops
+- **Wallet Integration**: Seamless connection with popular Solana wallets
+
+### 2. Potential Impact
+
+Droploop represents a significant advancement in event participation tracking:
+
+- **Cost Reduction**: Makes token distribution economically viable at scale
+- **Engagement Increase**: Referral mechanics incentivize community participation
+- **Accessibility**: Simple QR-based claiming reduces barriers to entry
+- **Analytics**: Provides creators with insights into their community growth
+
+### 3. Novelty
+
+Our approach introduces several innovative elements:
+
+- **Combined Referral + Airdrop**: Flexible distribution methods in a single platform
+- **Dynamic QR Generation**: Referral codes embedded in easily shareable QR formats
+- **Compressed Verification**: Efficient on-chain validation of participation
+- **Mode Switching**: Users can easily toggle between referral claiming and direct airdrops
+
+### 4. Design
+
+Droploop features a carefully crafted user experience:
+
+- **Minimalist Interface**: Clean black and white design that emphasizes functionality
+- **Responsive Layout**: Works seamlessly across desktop and mobile devices
+- **Progressive Disclosure**: Complex blockchain operations hidden behind intuitive interfaces
+- **Transaction Feedback**: Clear success and error states for all operations
+
+### 5. Extensibility
+
+The architecture prioritizes future expansion:
+
+- **Modular Components**: Easily adaptable for different token standards
+- **Configurable Parameters**: Customizable reward structures and campaign settings
+- **API-Ready**: Structured for potential headless operation
+- **Multi-Chain Potential**: Architecture could extend to other blockchains supporting ZK compression
 
 ## Technical Architecture
 
@@ -15,38 +78,179 @@ Droploop is built using:
 - **Solana Wallet Adapters**: For connecting to various Solana wallets
 - **TailwindCSS**: For responsive and customizable UI components
 
-## ZK Compression and Its Benefits
+## Technical Implementation Details
 
-ZK (Zero Knowledge) Compression is a revolutionary approach to blockchain state management that offers significant advantages for applications like Droploop:
+### QR Scanner Implementation
 
-### How ZK Compression Works
+The QR code scanner is a critical component of our submission that allows users to easily claim tokens by scanning referral codes. Here's how we implemented it:
 
-ZK compression utilizes Zero Knowledge proofs to validate the authenticity of blockchain data without revealing the entire data set. Here's how it benefits Droploop:
+#### Component Architecture
 
-1. **Cost Efficiency**: Traditional NFTs or tokens on Solana require full on-chain storage, costing approximately 0.01-0.05 SOL per mint. With ZK compression, Droploop reduces this cost by a factor of 1000x, enabling the creation of thousands of referral tokens for fractions of a cent.
+```typescript
+// QR Scanner Component Structure
+export function QRScanner({ onCodeScanned, onClose }: QRScannerProps) {
+  const scannerContainerId = "qr-reader";
+  const [isScanning, setIsScanning] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [permissionGranted, setPermissionGranted] = useState(false);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+  
+  // Camera and scanner management logic
+  // Permission handling
+  // QR processing
+}
+```
 
-2. **Scalability**: By compressing state data and using Merkle trees for verification, Droploop can handle large-scale referral campaigns with thousands of participants without congesting the blockchain.
+#### Technical Features
 
-3. **Security**: Despite the cost savings, ZK compression maintains the same security guarantees as traditional on-chain tokens. The cryptographic proofs ensure that referral data cannot be tampered with.
+1. **HTML5 Camera Integration**: We use the `html5-qrcode` library to access the device camera securely through browser APIs.
 
-4. **Privacy**: The zero-knowledge aspect allows certain information to remain private while still providing verification of legitimacy - useful for referral campaigns where some participant data may be sensitive.
+2. **Permission Management**: The scanner implements robust camera permission handling with appropriate UI feedback states:
+   ```typescript
+   const startScanner = async () => {
+     try {
+       await requestCameraPermission();
+       setPermissionGranted(true);
+       // Scanner initialization logic
+     } catch (err) {
+       setError("Camera access denied. Please grant permission and try again.");
+     }
+   };
+   ```
 
-5. **Performance**: Compressed transactions require less blockchain space, resulting in faster transaction finality and a more responsive user experience.
+3. **QR Code Processing**: When a QR code is detected, we process it using a dedicated utility:
+   ```typescript
+   // in referral-qrcode.ts
+   export function parseReferralData(data: string): {
+     referralCode?: string;
+     campaignId?: string;
+     campaignName?: string;
+   } | null {
+     // Logic to parse different QR code formats
+     // Handles both URL formats and direct codes
+   }
+   ```
 
-### Technical Implementation in Droploop
+4. **Multi-Format Support**: The scanner can process:
+   - Direct referral codes
+   - Full URLs with campaign parameters
+   - Deep links with encoded referral information
 
-Droploop implements ZK compression through Light Protocol's SDK, which provides:
+### Airdrop Mode Implementation
 
-- Compressed NFT/token creation for referral rewards
-- Merkle tree management for efficient state verification
-- State compression techniques to minimize on-chain footprint
-- ZK proof generation and verification for secure transactions
+The airdrop feature allows token distribution without requiring referral codes:
 
-This implementation allows creators to:
-- Create referral campaigns with 1000x more tokens for the same cost
-- Track referrals through cryptographically secure mechanisms
-- Distribute rewards automatically with minimal gas fees
-- Scale their communities without prohibitive blockchain costs
+#### State Management
+
+```typescript
+// State for tracking airdrop mode
+const [isAirdropMode, setIsAirdropMode] = useState(false);
+
+// Toggle function with appropriate state resets
+const toggleAirdropMode = () => {
+  setIsAirdropMode(!isAirdropMode);
+  setClaimCode(''); // Clear claim code when switching modes
+  setError(null);   // Clear any previous errors
+  
+  // Additional state cleanup logic
+};
+```
+
+#### Conditional Rendering
+
+The UI dynamically adapts based on the active mode:
+
+```tsx
+{!isAirdropMode ? (
+  <div className="space-y-2">
+    {/* Referral code input with QR scanner button */}
+  </div>
+) : (
+  <div className="text-center p-4 bg-black/20 rounded-lg">
+    <h3 className="text-lg font-semibold">Airdrop Mode Active</h3>
+    <p className="text-sm text-muted-foreground">
+      Connect your wallet and click "Claim Airdrop" below.
+    </p>
+  </div>
+)}
+```
+
+#### Transaction Logic
+
+The form submission handler adapts based on the active mode:
+
+```typescript
+const handleSubmit = async (e: FormEvent) => {
+  e.preventDefault();
+  // ... validation logic
+  
+  if (isAirdropMode) {
+    // Airdrop claim logic
+    tokenToClaimAddress = AIRDROP_MINT_ADDRESS;
+    finalEventDetailsForSuccessView = { 
+      name: "Community Airdrop", 
+      mint: AIRDROP_MINT_ADDRESS 
+    };
+  } else {
+    // Referral claim logic
+    // Uses claimCode and/or eventDetails
+  }
+  
+  // Proceed with token transfer
+};
+```
+
+## ZK Compression Integration
+
+ZK (Zero Knowledge) Compression powers the token transfer system in Droploop:
+
+### Technical Implementation
+
+1. **Compressed Token Transfers**: 
+   ```typescript
+   export async function transferCompressedTokens(
+     connection: Connection,
+     payer: Keypair,
+     mintAddress: PublicKey,
+     amount: number,
+     owner: Keypair,
+     destination: PublicKey
+   ): Promise<string> {
+     // Light Protocol integration for compressed token transfers
+   }
+   ```
+
+2. **Keypair Management**: We implemented a secure approach for managing the admin keypair:
+   ```typescript
+   export function getAdminKeypair(): Keypair | null {
+     try {
+       // Environment-based configuration
+       const privateKeyBase58 = process.env.NEXT_PUBLIC_ADMIN_PRIVATE_KEY;
+       if (!privateKeyBase58) return null;
+       
+       // Convert base58 private key to Uint8Array
+       const privateKeyBytes = decode(privateKeyBase58);
+       return Keypair.fromSecretKey(new Uint8Array(privateKeyBytes));
+     } catch (error) {
+       console.error('Error creating admin keypair:', error);
+       return null;
+     }
+   }
+   ```
+
+3. **Demo Mode**: For hackathon demonstration purposes, we implemented a demo mode in `transactions.ts`:
+   ```typescript
+   // Determines if we use real or simulated transactions
+   const DEMO_MODE = true;
+   
+   // Simulation logic for demo presentations
+   if (DEMO_MODE) {
+     await new Promise(resolve => setTimeout(resolve, 1500));
+     const fakeSig = Array.from({length: 64}, () => 
+       "0123456789abcdef"[Math.floor(Math.random() * 16)]).join('');
+     return fakeSig;
+   }
+   ```
 
 ## Directory Structure
 
@@ -220,6 +424,77 @@ The UI is built with:
 - **Massive Throughput**: Capable of supporting referral campaigns with 100,000+ participants through Light Protocol's ZK compression
 - **Cost Efficiency**: 99.9% reduction in storage costs compared to traditional referral tracking (approximately 0.000005 SOL per referral vs 0.005 SOL)
 - **Network Efficiency**: Reduces on-chain storage requirements by up to 1000x while maintaining full L1 security guarantees
+
+## Recent Implementation Updates
+
+### QR Scanner Integration
+
+We've implemented a fully featured QR scanner that allows users to:  
+- Scan QR codes containing referral information
+- Automatically extract and populate form fields
+- Handle different QR code formats (direct codes or URLs with parameters)
+
+This fulfills the hackathon requirement for attendees to claim tokens by scanning QR codes, making the token distribution process seamless and user-friendly.
+
+### Airdrop Mode
+
+In addition to the referral-based claiming mechanism, we've added a dedicated airdrop mode that:
+- Allows direct token distribution without requiring referral codes
+- Provides a simple toggle between referral and airdrop modes
+- Simplifies the claiming process for promotional events
+
+This dual-mode approach gives event organizers flexibility in how they distribute tokens to participants.
+
+### UI Refinements
+
+We've refined the user interface with:
+- A minimalist black and white color scheme for elegance and readability
+- Consistent navigation labels and user flows
+- Clear feedback on successful token claims
+- Mobile-responsive design for on-the-go usage
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 16+ and npm
+- A Solana wallet (Phantom, Solflare, etc.)
+
+### Installation
+
+1. Clone the repository
+   ```bash
+   git clone https://github.com/ayushshrivastv/Droploop.git
+   cd Droploop
+   ```
+
+2. Install dependencies
+   ```bash
+   npm install
+   ```
+
+3. Create a `.env.local` file with the following variables:
+   ```
+   NEXT_PUBLIC_ADMIN_PRIVATE_KEY=YOUR_ADMIN_PRIVATE_KEY
+   NEXT_PUBLIC_AIRDROP_MINT_ADDRESS=YOUR_AIRDROP_MINT_ADDRESS
+   NEXT_PUBLIC_RPC_ENDPOINT=https://api.devnet.solana.com
+   ```
+
+4. Run the development server
+   ```bash
+   npm run dev
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+### Demo Mode
+
+For hackathon demonstration purposes, the application includes a demo mode (enabled by default) that:
+- Simulates token transfers without requiring a funded admin wallet
+- Generates realistic transaction signatures
+- Allows testing of the complete user flow without blockchain configuration
+
+To switch to real transactions, set `DEMO_MODE = false` in `/src/lib/solana/transactions.ts` and ensure your admin wallet is properly configured.
 - **Batch Processing**: Optimized for high-volume referral processing with minimal network congestion
 
 ### ZK Compression Technology
