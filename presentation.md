@@ -22,6 +22,8 @@ Behind the scenes, we're leveraging Light Protocol's compression technology to m
 
 Once created, you'll see your campaign dashboard with live stats on referrals and a download option for your QR codes. The entire process takes under a minute, and you're ready to run a referral program reaching 100,000+ participants with minimal fees. Perfect for community building, product launches, or any Web3 project looking to grow through referrals.
 
+![Screenshot 2025-05-12 at 12 42 37 PM](https://github.com/user-attachments/assets/67d15b9c-ac3e-4518-83ad-77f9380f2702)
+
 ## Claim Your Referral
 
 Our claim page makes participating in referral programs effortless. Just scan a QR code with your phone or paste a referral code, connect your Solana wallet with one tap, and instantly receive your token reward. No crypto expertise needed.
@@ -31,6 +33,8 @@ The page has two tabs: one for referral claims and another for direct airdrops. 
 Behind the scenes, we're using Light Protocol's compression tech to keep fees super low – about 1000x cheaper than regular token transfers. Your reward appears instantly in your wallet and you immediately become eligible to refer others. Simple, fast, and actually rewarding.
 
 Claiming a referral takes just seconds. Users scan the referral QR code with their phone camera, which automatically opens their Solana wallet app. They review the reward details on a clean claim screen, tap "Approve" to confirm, and wait 2-3 seconds for network confirmation. A success animation appears as their new compressed token lands in their wallet. The entire process is intuitive even for crypto beginners, with permanent on-chain proof of their participation now secured.
+
+![Screenshot 2025-05-12 at 12 43 21 PM](https://github.com/user-attachments/assets/fc15b653-4390-4831-8ec1-39c55dbdec0d)
 
 ## Wallet
 
