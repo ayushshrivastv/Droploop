@@ -6,7 +6,7 @@ Built for the 1000x Hackathon - Best cToken integration for Solana Pay Bounty, t
 
 **[Droploop Project](https://droploop-ten.vercel.app)**
 
-![Screenshot 2025-05-11 at 7 02 22 AM](https://github.com/user-attachments/assets/f88b6e7f-a629-48c6-98ea-aa145f0ccd1c)
+![Screenshot 2025-05-12 at 12 41 15 PM](https://github.com/user-attachments/assets/f4ecd134-a0d5-4b0a-96f9-e1f41a5b6e26)
 
 ## Referral System Workflow
 
@@ -28,8 +28,7 @@ A powerful and cost effective solution for creating and managing referral campai
 
 ![Screenshot 2025-05-11 at 7 03 21 AM](https://github.com/user-attachments/assets/ea0aba20-76e3-4031-96ec-5f6b7b80c64d)
 
-![Screenshot 2025-05-11 at 7 03 43 AM](https://github.com/user-attachments/assets/a22b4d88-ec6f-4d0e-ae74-94ebf8ed0e99)
-
+![Screenshot 2025-05-12 at 12 39 55 PM](https://github.com/user-attachments/assets/6d551ee3-e33b-4f4f-98c6-559d296e5852)
 
 ## Referral System & Rewards
 
