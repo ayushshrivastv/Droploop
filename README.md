@@ -2,7 +2,7 @@
 
 Droploop enables creators to build decentralized referral campaigns that reward users for inviting others to join their community. Through unique QR codes and referral links, users can easily share and track their referrals, with rewards automatically distributed as compressed tokens on the Solana blockchain.
 
-Built for the Best cPOP Interface track of the 1000x Hackathon, this application demonstrates how referral programs can leverage blockchain technology for transparency, cost-effectiveness, and scalability without compromising on user experience.
+Built for the 1000x Hackathon - Best cToken integration for Solana Pay Bounty, this application demonstrates how referral programs can leverage blockchain technology for transparency, cost-effectiveness, and scalability without compromising on user experience.
 
 **[Droploop Project](https://droploop-ten.vercel.app)**
 
@@ -27,6 +27,7 @@ A powerful and cost effective solution for creating and managing referral campai
 ![Screenshot 2025-05-11 at 7 03 21 AM](https://github.com/user-attachments/assets/ea0aba20-76e3-4031-96ec-5f6b7b80c64d)
 
 ![Screenshot 2025-05-11 at 7 03 43 AM](https://github.com/user-attachments/assets/a22b4d88-ec6f-4d0e-ae74-94ebf8ed0e99)
+
 
 ## Referral System & Rewards
 
