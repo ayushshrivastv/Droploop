@@ -12,6 +12,8 @@ Built for the 1000x Hackathon - Best cToken integration for Solana Pay Bounty, t
 
 Droploop uses Light Protocol's ZK Compression to make referral campaigns cost-effective and scalable. When a creator starts a campaign, they generate unique referral codes that can be shared via QR codes. When someone joins through a referral, the smart contract verifies the legitimacy of the referral and rewards both the referrer and the new user with compressed tokens. All transactions are securely recorded on the Solana blockchain with ZK Compression, making the entire process 1000x more affordable than traditional methods.
 
+For a detailed presentation of the Droploop referral system, including features, benefits, and technical details, please see our [presentation document](./presentation.md).
+
 ## Functionality
 
 Creators can connect their Solana wallet, initiate a referral campaign, and set the reward parameters for both referrers and new joiners. Upon creation, the system generates unique referral QR codes and links that can be distributed across various channels. Users can join through these referrals and earn rewards in the form of compressed tokens. All campaign statistics are tracked in real-time, giving creators full visibility into their referral program's performance.
@@ -226,10 +228,6 @@ The Next.js frontend provides:
 ## Project Status
 
 This project was developed as part of the ZK Compression Track by Solana Foundation, Helius, and Light Protocol. It demonstrates the practical application of compressed accounts for NFT-like use cases.
-
-## Special Thanks
-
-Gratitude to the teams behind Light Protocol and Solana for their exceptional infrastructure and tools. Additional thanks to the developers of Next.js, the creators of shadcn/ui, and the broader Solana community for their ongoing support and innovation.
 
 ## License
 

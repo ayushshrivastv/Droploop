@@ -217,7 +217,29 @@ export function ClaimForm() {
         cluster: process.env.NEXT_PUBLIC_CLUSTER as "devnet" | "mainnet-beta" | "testnet" | "localnet" || DEFAULT_CLUSTER
       };
       const connection = createConnection(appConfig);
-      const senderKeypair = /*await window.solana.getSecretKey() or other secure method*/ new Keypair();
+
+      const privateKeyString = process.env.NEXT_PUBLIC_SENDER_PRIVATE_KEY;
+      if (!privateKeyString) {
+        setError("Sender private key is not configured in environment variables. Please contact an administrator or set NEXT_PUBLIC_SENDER_PRIVATE_KEY.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      let senderKeypair: Keypair;
+      try {
+        // Assuming the private key is stored as a base58 encoded string of the secret key (64 bytes)
+        // Or, if it's a stringified byte array, use: Uint8Array.from(JSON.parse(privateKeyString))
+        // For simplicity, let's assume bs58 encoded secret key for now.
+        // WalletAdapter.fromSecretKey() is not directly available, must use Keypair.fromSecretKey
+        const bs58 = await import('bs58'); // Dynamically import bs58
+        senderKeypair = Keypair.fromSecretKey(bs58.decode(privateKeyString));
+      } catch (keyError) {
+        console.error("Error deriving sender keypair from private key:", keyError);
+        setError("Invalid sender private key format in environment variables. Ensure it's a valid base58 encoded secret key.");
+        setIsSubmitting(false);
+        return;
+      }
+
       const signature = await transferCompressedTokens(
         connection,
         senderKeypair, // Payer for the transaction fees
@@ -338,7 +360,7 @@ export function ClaimForm() {
               </p>
               <p className="text-sm text-muted-foreground mt-1 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M11 17a1 1 0 001.447-.894l4-12a1 1 0 11-1.898-.632l4 12a1 1 0 01-1.447.894L9 15.354m-5 6H2a1 1 0 01-1-1v-4a1 1 0 011-1h12a1 1 0 011 1v4a1 1 0 01-1 1z" clipRule="evenodd" />
+                  <path d="M11 17a1 1 0 001.447-.894l4-12a1 1 0 010 1.788l-4 12a1 1 0 01-1.447-.894L9 15.354m-5 6H2a1 1 0 01-1-1v-4a1 1 0 011-1h12a1 1 0 011 1v4a1 1 0 01-1 1z" clipRule="evenodd" />
                 </svg>
                 Token: {eventDetails.mint.slice(0, 4)}...{eventDetails.mint.slice(-4)}
               </p>
@@ -365,7 +387,7 @@ export function ClaimForm() {
               <div className="space-y-2">
                 <Label htmlFor="claimCode" className="flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 010 1.788l4-12a1 1 0 011.265-.633zM5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clipRule="evenodd" />
+                    <path fillRule="evenodd" d="M12.316 3.051a3.066 3.066 0 001.745-.894l4 12a1 1 0 010 1.788l-4 12a3.066 3.066 0 01-5.434 0l-4-12A3.066 3.066 0 013.001 8.22L8.12 3.45a3.066 3.066 0 015.434 0z" clipRule="evenodd" />
                   </svg>
                   Referral Code
                 </Label>

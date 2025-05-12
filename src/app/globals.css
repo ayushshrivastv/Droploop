@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    /* Light theme not used - we're focusing on dark theme */
+    /* Light theme for article style design */
     --background: 0 0% 100%;
     --foreground: 0 0% 0%;
     --card: 0 0% 100%;
@@ -17,18 +17,18 @@
     --secondary-foreground: 0 0% 0%;
     --muted: 0 0% 95%;
     --muted-foreground: 0 0% 45%;
-    --accent: 0 0% 25%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 0%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
     --border: 0 0% 85%;
     --input: 0 0% 85%;
     --ring: 0 0% 0%;
-    --radius: 0.5rem;
+    --radius: 0rem;
   }
 
-  /* Apple-inspired dark theme */
-  .dark, :root {
+  /* Dark theme - only applied when .dark class is present */
+  .dark {
     /* Dark background slightly lighter than pure black (like macOS) */
     --background: 220 20% 2.5%;
     --foreground: 210 6% 96%;

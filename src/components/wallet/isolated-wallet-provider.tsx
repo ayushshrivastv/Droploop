@@ -5,8 +5,20 @@ import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { 
+  PhantomWalletAdapter,
   SolflareWalletAdapter,
-  TorusWalletAdapter
+  TorusWalletAdapter,
+  LedgerWalletAdapter,
+  CoinbaseWalletAdapter,
+  CloverWalletAdapter,
+  MathWalletAdapter,
+  SolongWalletAdapter,
+  Coin98WalletAdapter,
+  AlphaWalletAdapter,
+  AvanaWalletAdapter,
+  BitKeepWalletAdapter,
+  BitpieWalletAdapter,
+  TrustWalletAdapter
 } from '@solana/wallet-adapter-wallets';
 import { DEVNET_RPC_ENDPOINT, MAINNET_RPC_ENDPOINT } from '@/lib/constants';
 
@@ -49,8 +61,20 @@ export const IsolatedWalletProvider: FC<IsolatedWalletProviderProps> = ({ childr
     const now = performance.now();
     console.log(`[PW] IsolatedWalletProvider: useMemo (wallets) at ${now.toFixed(0)}ms. Network: ${network}`);
     return [
+      new PhantomWalletAdapter(),
       new SolflareWalletAdapter({ network }),
+      new CoinbaseWalletAdapter(),
+      new LedgerWalletAdapter(),
       new TorusWalletAdapter(),
+      new SolongWalletAdapter(),
+      new CloverWalletAdapter(),
+      new MathWalletAdapter(),
+      new Coin98WalletAdapter(),
+      new AlphaWalletAdapter(),
+      new AvanaWalletAdapter(),
+      new BitKeepWalletAdapter(),
+      new BitpieWalletAdapter(),
+      new TrustWalletAdapter()
     ];
   }, [network]);
 

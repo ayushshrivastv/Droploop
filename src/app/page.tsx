@@ -2,353 +2,251 @@
 
 import { ROUTES } from '@/lib/constants';
 import Link from 'next/link';
-import { AppleLayout } from '@/components/layouts/apple-layout';
-import { HeroSection } from '@/components/ui/apple-style/hero-section';
-import { FeatureSection } from '@/components/ui/apple-style/feature-section';
-import { SpecGrid } from '@/components/ui/apple-style/spec-grid';
-import { CTASection } from '@/components/ui/apple-style/cta-section';
-import { ReadmeShowcase } from '@/components/ui/apple-style/readme-showcase';
-import { BenefitsTable } from '@/components/ui/apple-style/benefits-table';
-import { FeatureHighlight } from '@/components/ui/apple-style/feature-highlight';
-import { ParticlesBackground } from '@/components/ui/particles-background';
+import { ArticleLayout } from '@/components/layouts/article-layout';
 import { motion } from 'framer-motion';
-
-// Icon components for feature section
-const ZkIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="6" width="20" height="12" rx="2"/>
-    <path d="M6 12h12"/>
-    <path d="M8 10v4"/>
-    <path d="M16 10v4"/>
-  </svg>
-);
-
-const QrIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="7" height="7"/>
-    <rect x="14" y="3" width="7" height="7"/>
-    <rect x="14" y="14" width="7" height="7"/>
-    <rect x="3" y="14" width="7" height="7"/>
-  </svg>
-);
-
-const TokenIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"/>
-    <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-    <line x1="9" y1="9" x2="9.01" y2="9"/>
-    <line x1="15" y1="9" x2="15.01" y2="9"/>
-  </svg>
-);
-
-const specItems = [
-  {
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-        <path d="M2 17l10 5 10-5"/>
-        <path d="M2 12l10 5 10-5"/>
-      </svg>
-    ),
-    title: 'Dual Rewards',
-    description: 'Automatically reward both referrers and new joiners with compressed tokens.',
-  },
-  {
-    icon: <QrIcon />,
-    title: 'QR Code Referrals',
-    description: 'Generate unique QR codes for each referrer to share and track their referrals.',
-  },
-  {
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-        <circle cx="8.5" cy="8.5" r="1.5"/>
-        <polyline points="21 15 16 10 5 21"/>
-      </svg>
-    ),
-    title: 'Custom Campaigns',
-    description: 'Create personalized referral campaigns with your branding and reward structure.',
-  },
-  {
-    icon: <TokenIcon />,
-    title: 'Campaign Metadata',
-    description: 'Attach detailed information to your campaigns for transparent referral tracking.',
-  },
-  {
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-      </svg>
-    ),
-    title: 'Fraud Prevention',
-    description: 'Secure verification ensures only legitimate referrals receive rewards.',
-  },
-  {
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2a10 10 0 1 0 10 10H12V2Z"/>
-        <path d="M21.17 8H12V2.83c2 .17 4.3 1.53 5.5 2.75 2.1 2.07 3.5 3.9 3.67 5.42Z"/>
-      </svg>
-    ),
-    title: 'Referral Analytics',
-    description: 'Track campaign performance with detailed metrics on conversions, rewards, and engagement.',
-  },
-];
-
-// Benefits metrics data for comparison table
-const benefitsMetrics = [
-  {
-    metric: 'Storage Cost per Referral',
-    traditional: '~0.005 SOL',
-    scalable: '~0.000005 SOL',
-    improvement: '1000x reduction'
-  },
-  {
-    metric: 'Referrals per Transaction',
-    traditional: '1',
-    scalable: 'Up to 1,000',
-    improvement: '1000x throughput'
-  },
-  {
-    metric: 'Gas Fees for 10,000 Referrals',
-    traditional: '~50 SOL',
-    scalable: '~0.05 SOL',
-    improvement: '1000x savings'
-  },
-  {
-    metric: 'Referral Verification Time',
-    traditional: '2-5 seconds',
-    scalable: '2-5 seconds',
-    improvement: 'Equal UX'
-  },
-  {
-    metric: 'Maximum Campaign Size',
-    traditional: '~1,000 participants',
-    scalable: '100,000+ participants',
-    improvement: '100x scalability'
-  }
-];
+import { Button } from '@/components/ui/button';
 
 export default function Home() {
-  // Custom title component with gradient styling
-  const heroTitle = (
-    <div className="space-y-2">
-      <motion.h1 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="text-5xl md:text-7xl font-bold tracking-tight text-white"
-      >
-        <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-pink-600">Droploop</span>
-      </motion.h1>
-      <motion.h2 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.2 }}
-        className="text-3xl md:text-5xl font-bold tracking-tight text-white"
-      >
-        Decentralized Referral System
-      </motion.h2>
-    </div>
-  );
-
   return (
-    <AppleLayout>
-      {/* Particles background */}
-      <ParticlesBackground />
+    <ArticleLayout>
+      {/* Hero Section */}
+      <section className="min-h-screen flex items-center justify-center border-b border-gray-800">
+        <div className="container max-w-3xl mx-auto px-4 py-24">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center"
+          >
+            <h1 className="text-5xl font-serif font-medium mb-6 tracking-tight text-white">Droploop</h1>
+            <p className="text-2xl font-serif text-white mb-8">
+              A decentralized referral system on Solana using ZK Compression with Light Protocol.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+              <Button asChild className="bg-white text-black hover:bg-gray-200 rounded-none">
+                <Link href={`${ROUTES.MINT}?tab=campaign`}>Create Referral</Link>
+              </Button>
+              <Button asChild className="bg-white text-black hover:bg-gray-200 rounded-none">
+                <Link href={ROUTES.CLAIM}>Claim Referral</Link>
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
       
-      {/* Hero section */}
-      <HeroSection
-        title={heroTitle}
-        subtitle="A decentralized referral system on Solana using ZK Compression with Light Protocol for community growth."
-        primaryButtonText="Create Referral"
-        primaryButtonLink={`${ROUTES.MINT}?tab=campaign`}
-        secondaryButtonText="Claim Referral"
-        secondaryButtonLink={ROUTES.CLAIM}
-        showParticles={true}
-      />
 
-      {/* Feature section */}
-      <div className="flex items-center justify-center py-16 bg-black/30">
-        <div className="container max-w-5xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-indigo-500">
-            ZK Compression for Scalable Referrals
-          </h2>
-          <p className="text-xl text-center text-zinc-300 max-w-3xl mx-auto mb-12">
-            Leverage Light Protocol's ZK compression technology to create referral campaigns at 1/1000th the cost 
-            while maintaining full security and transparency on Solana.
-          </p>
+
+      {/* Main Article Section */}
+      <section className="py-20 text-white">
+        <div className="container max-w-3xl mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="mb-12"
+          >
+            <h2 className="text-4xl md:text-5xl font-serif font-medium mb-6 tracking-tight">
+              Revolutionizing Referral Programs with ZK Compression
+            </h2>
+            <p className="text-xl md:text-2xl text-gray-300 font-serif">
+              How Droploop is making community growth 1000x more efficient on Solana
+            </p>
+          </motion.div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-            <div className="bg-black/20 rounded-xl p-6 border border-gray-800 backdrop-blur-sm">
-              <div className="h-12 w-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
-                <ZkIcon />
-              </div>
-              <h3 className="text-xl font-semibold mb-3 text-white">Community Growth</h3>
-              <p className="text-zinc-400">Incentivize users to invite others and grow your community through rewards.</p>
-            </div>
+          <div className="prose prose-lg max-w-none font-serif">
+            <motion.p 
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="mb-6 text-lg leading-relaxed text-white"
+            >
+              In the rapidly evolving landscape of Web3 communities, effective growth mechanisms are essential. 
+              Traditional referral systems face significant challenges: high gas fees, limited scalability, and 
+              complex user experiences. Droploop addresses these challenges head-on by leveraging Zero-Knowledge 
+              compression technology on Solana.
+            </motion.p>
+
+            <motion.p 
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="mb-6 text-lg leading-relaxed text-white"
+            >
+              Our platform enables creators to launch referral campaigns with minimal cost while maintaining 
+              security and transparency. Users can join through personalized QR codes, and both referrers and 
+              new participants receive token rewards automatically—all at a fraction of the traditional cost.
+            </motion.p>
+
+            <motion.h3 
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="text-2xl font-serif font-medium mt-12 mb-4 tracking-tight text-white"
+            >
+              The Problem with Traditional Referral Systems
+            </motion.h3>
             
-            <div className="bg-black/20 rounded-xl p-6 border border-gray-800 backdrop-blur-sm">
-              <div className="h-12 w-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
-                <QrIcon />
-              </div>
-              <h3 className="text-xl font-semibold mb-3 text-white">QR Code Referrals</h3>
-              <p className="text-zinc-400">Allow easy sharing through personalized referral QR codes for each participant.</p>
-            </div>
-            
-            <div className="bg-black/20 rounded-xl p-6 border border-gray-800 backdrop-blur-sm">
-              <div className="h-12 w-12 bg-pink-500/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
-                <TokenIcon />
-              </div>
-              <h3 className="text-xl font-semibold mb-3 text-white">Automatic Rewards</h3>
-              <p className="text-zinc-400">Distribute compressed tokens to both referrers and new users automatically.</p>
-            </div>
-          </div>
-          
-          <div className="bg-black/30 rounded-xl p-8 border border-gray-800 backdrop-blur-sm">
-            <h3 className="text-2xl font-semibold mb-4 text-white">Solana Smart Contract Integration</h3>
-            <p className="text-zinc-300 mb-4">Built on Solana's high-performance blockchain for lightning-fast, low-cost transactions.</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-              <div className="flex items-start">
-                <div className="h-8 w-8 bg-green-500/20 rounded-lg flex items-center justify-center mr-3 mt-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="text-lg font-medium text-white">Light Protocol Integration</h4>
-                  <p className="text-zinc-400">Leverages ZK proofs for secure and efficient compressed state management.</p>
-                </div>
-              </div>
-              <div className="flex items-start">
-                <div className="h-8 w-8 bg-blue-500/20 rounded-lg flex items-center justify-center mr-3 mt-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="text-lg font-medium text-white">Merkle Tree Verification</h4>
-                  <p className="text-zinc-400">Uses cryptographic proofs to validate referral authenticity without revealing data.</p>
-                </div>
-              </div>
-              <div className="flex items-start">
-                <div className="h-8 w-8 bg-purple-500/20 rounded-lg flex items-center justify-center mr-3 mt-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="text-lg font-medium text-white">Gas-Efficient Claims</h4>
-                  <p className="text-zinc-400">Optimized token transfers, costing just fractions of a cent per claim.</p>
-                </div>
-              </div>
-              <div className="flex items-start">
-                <div className="h-8 w-8 bg-pink-500/20 rounded-lg flex items-center justify-center mr-3 mt-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-pink-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="text-lg font-medium text-white">Wallet-to-Wallet Transfers</h4>
-                  <p className="text-zinc-400">Direct token transfers between referrers and participants without intermediaries.</p>
-                </div>
-              </div>
-            </div>
+            <motion.p 
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="mb-6 text-lg leading-relaxed text-white"
+            >
+              Web3 projects have long struggled with efficient growth mechanisms. Traditional on-chain referral 
+              programs face three critical limitations:
+            </motion.p>
+
+            <motion.ul 
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="list-disc pl-6 mb-6 space-y-2 text-gray-200"
+            >
+              <li className="text-lg">High costs: Traditional NFTs or tokens on Solana require full on-chain storage, costing approximately 0.01-0.05 SOL per mint.</li>
+              <li className="text-lg">Limited scalability: As communities grow, transaction fees and storage requirements become prohibitive.</li>
+              <li className="text-lg">Complex user experience: Many systems require technical knowledge, creating barriers to adoption.</li>
+            </motion.ul>
+
+            <motion.blockquote 
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="border-l-4 border-gray-300 pl-4 italic my-8 text-xl text-gray-300"
+            >
+              The cost of running a 10,000-participant referral program with traditional methods would be approximately 
+              50 SOL. With Droploop's ZK compression, the same program costs just 0.05 SOL—a 1000x reduction.
+            </motion.blockquote>
           </div>
         </div>
-      </div>
-      {/* Feature Highlight */}
-      <FeatureHighlight
-        title="Personalized Referral QR Codes"
-        description="Seamless referral sharing with personalized QR codes that encode referral data for instant attribution and rewards."
-        subtitle="Share and track with ease"
-        primaryColor="purple"
-        secondaryColor="pink"
-        items={[
-          {
-            title: "Unique Generation",
-            description: "Each participant receives a personalized QR code with their referral code embedded for accurate tracking.",
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="7" height="7"/>
-                <rect x="14" y="3" width="7" height="7"/>
-                <rect x="14" y="14" width="7" height="7"/>
-                <rect x="3" y="14" width="7" height="7"/>
-              </svg>
-            )
-          },
-          {
-            title: "Instant Recognition",
-            description: "QR codes are instantly recognized by any QR scanner, making joining through referrals easy for anyone.",
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-                <line x1="9" y1="9" x2="9.01" y2="9"/>
-                <line x1="15" y1="9" x2="15.01" y2="9"/>
-              </svg>
-            )
-          },
-          {
-            title: "Referral Embedding",
-            description: "Each QR code contains all necessary referral data for accurate attribution and seamless campaign joining.",
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
-              </svg>
-            )
-          },
-          {
-            title: "Wallet Connectivity",
-            description: "QR codes connect to the user's Solana wallet when scanned, enabling automatic reward distribution.",
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="6" width="20" height="12" rx="2"/>
-                <path d="M6 12h12"/>
-              </svg>
-            )
-          },
-          {
-            title: "Multi-Channel Sharing",
-            description: "Referral codes can be shared via QR codes, direct links, or text, maximizing distribution opportunities.",
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6 9 6 2 18 2 18 9"/>
-                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-                <rect x="6" y="14" width="12" height="8"/>
-              </svg>
-            )
-          },
-          {
-            title: "Fraud Prevention",
-            description: "Built-in security measures prevent abuse of the referral system, ensuring only legitimate referrals earn rewards.",
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              </svg>
-            )
-          },
-        ]}
-      />
-      {/* Benefits Table */}
-      <BenefitsTable metrics={benefitsMetrics} />
-      {/* Specs Grid */}
-      <SpecGrid
-        title="Referral Features"
-        subtitle="Powerful tools to grow your community through incentivized sharing"
-        items={specItems}
-      />
-      {/* README Showcase */}
-      <ReadmeShowcase />
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 bg-black text-white">
+        <div className="container max-w-3xl mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="mb-12"
+          >
+            <h2 className="text-4xl font-serif font-medium mb-6 tracking-tight">Key Features</h2>
+            <p className="text-xl text-gray-300 font-serif">
+              Droploop offers powerful tools for community growth through ZK compression
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="border border-gray-700 p-6"
+            >
+              <h3 className="text-xl font-serif font-medium mb-3">QR Code Scanner Integration</h3>
+              <p className="text-white mb-4">
+                Seamlessly scan referral QR codes using your device camera. Our implementation uses HTML5-QRCode 
+                for secure camera access with robust permission handling.
+              </p>
+              <ul className="list-disc pl-6 text-white space-y-1">
+                <li>Multi-format support for different QR code types</li>
+                <li>Automatic form population with scanned data</li>
+                <li>Responsive camera interface</li>
+              </ul>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="border border-gray-700 p-6"
+            >
+              <h3 className="text-xl font-serif font-medium mb-3">Airdrop Mode</h3>
+              <p className="text-white mb-4">
+                Distribute tokens directly without requiring referral codes. This gives event organizers 
+                flexibility in how they distribute tokens to participants.
+              </p>
+              <ul className="list-disc pl-6 text-white space-y-1">
+                <li>Simple toggle between referral and airdrop modes</li>
+                <li>Dynamic UI adaptation based on active mode</li>
+                <li>Streamlined claiming process</li>
+              </ul>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="border border-gray-700 p-6"
+            >
+              <h3 className="text-xl font-serif font-medium mb-3">Cost Efficiency</h3>
+              <p className="text-white mb-4">
+                Reduce storage costs by a factor of 1000x, enabling the creation of thousands of referral tokens 
+                for fractions of a cent.
+              </p>
+              <ul className="list-disc pl-6 text-white space-y-1">
+                <li>~0.000005 SOL per referral (vs ~0.005 SOL traditional)</li>
+                <li>Support for campaigns with 100,000+ participants</li>
+                <li>Minimal gas fees for all operations</li>
+              </ul>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="border border-gray-700 p-6"
+            >
+              <h3 className="text-xl font-serif font-medium mb-3">Security & Privacy</h3>
+              <p className="text-white mb-4">
+                Maintain the same security guarantees as traditional on-chain tokens through cryptographic proofs, 
+                while keeping certain information private.
+              </p>
+              <ul className="list-disc pl-6 text-white space-y-1">
+                <li>Zero-knowledge proofs for data validation</li>
+                <li>Merkle tree verification for referral authenticity</li>
+                <li>Secure wallet connection and transaction handling</li>
+              </ul>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
-      <CTASection
-        title="Ready to grow your community?"
-        description="Launch your first referral campaign and start rewarding your community."
-        primaryButtonText="Create Referral"
-        primaryButtonLink={`${ROUTES.MINT}?tab=campaign`}
-        secondaryButtonText="Claim Referral"
-        secondaryButtonLink={ROUTES.CLAIM}
-      />
-    </AppleLayout>
+      <section className="py-20 border-t border-gray-800">
+        <div className="container max-w-3xl mx-auto px-4 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <h2 className="text-4xl font-serif font-medium mb-6 tracking-tight">Ready to grow your community?</h2>
+            <p className="text-xl text-white font-serif mb-8">
+              Launch your first referral campaign and start rewarding your community.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button asChild className="bg-white text-black hover:bg-gray-200 rounded-none">
+                <Link href={`${ROUTES.MINT}?tab=campaign`}>Create Referral</Link>
+              </Button>
+              <Button asChild className="bg-white text-black hover:bg-gray-200 rounded-none">
+                <Link href={ROUTES.CLAIM}>Claim Referral</Link>
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    </ArticleLayout>
   );
 }
