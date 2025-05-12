@@ -5,8 +5,9 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { formatPublicKey } from '@/lib/utils/solana';
-import { motion } from 'framer-motion';
+import { useSafeWallet } from '@/hooks/use-safe-wallet';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
+import { motion } from 'framer-motion';
 
 // Dynamically import the WalletMultiButton to ensure it only loads client-side
 const WalletMultiButton = dynamic(
@@ -51,8 +52,18 @@ const WalletConnectButtonContent: FC<WalletConnectButtonProps> = ({
   className = ''
 }) => {
   const [isWalletReady, setIsWalletReady] = useState(false);
-  const { publicKey, connected, connecting, disconnect, select, wallet, wallets } = useWallet();
-  const { setVisible } = useWalletModal();
+  const wallet = useSafeWallet();
+  const { publicKey, connected, connecting, disconnect, select, wallet: walletInstance, wallets } = wallet || {};
+  
+  // Only access modal on client side
+  const [isBrowser, setIsBrowser] = useState(false);
+  useEffect(() => {
+    setIsBrowser(typeof window !== 'undefined');
+  }, []);
+  
+  // Handle wallet modal safely
+  const modalContext = useWalletModal();
+  const setVisible = isBrowser ? modalContext?.setVisible : undefined;
   const [isHovered, setIsHovered] = useState(false);
   const walletCheckTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -77,7 +88,9 @@ const WalletConnectButtonContent: FC<WalletConnectButtonProps> = ({
       const reconnectTimeout = setTimeout(() => {
         try {
           console.debug('[WalletButton] Attempting auto-reconnect');
-          select(wallet.adapter.name);
+          if (walletInstance) {
+            select(walletInstance.adapter.name);
+          }
         } catch (e) {
           console.debug('[WalletButton] Auto-reconnect failed:', e);
         }

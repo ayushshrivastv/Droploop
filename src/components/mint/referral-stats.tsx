@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useSafeWallet } from '@/hooks/use-safe-wallet';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 
@@ -17,7 +17,8 @@ interface ReferralData {
  * Displays statistics about the user's referral program
  */
 export function ReferralStats() {
-  const { publicKey, connected } = useWallet();
+  const wallet = useSafeWallet();
+  const { publicKey, connected } = wallet || {};
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<ReferralData>({
     totalReferrals: 0,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useSafeWallet } from '@/hooks/use-safe-wallet';
 import { PageLayout } from '@/components/layouts/page-layout';
 import { ROUTES } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,8 @@ import { cn } from '@/lib/utils';
 import type { FC } from 'react';
 
 export default function ProfilePage() {
-  const { publicKey, connected } = useWallet();
+  const wallet = useSafeWallet();
+  const { publicKey, connected } = wallet || {};
   const router = useRouter();
   const [tokens, setTokens] = useState<any[]>([]);
   const [referrals, setReferrals] = useState<any[]>([]);

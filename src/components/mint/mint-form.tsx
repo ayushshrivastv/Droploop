@@ -8,7 +8,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useSafeWallet } from '@/hooks/use-safe-wallet';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -71,7 +71,8 @@ export function MintForm() {
     }
   }, [searchParams]);
 
-  const { publicKey, connected, signTransaction, sendTransaction } = useWallet();
+  const wallet = useSafeWallet();
+  const { publicKey, connected, signTransaction, sendTransaction } = wallet || {};
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("event"); // Default tab is event
   const [isSubmitting, setIsSubmitting] = useState(false);

@@ -9,7 +9,7 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useSafeWallet } from '@/hooks/use-safe-wallet';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { PublicKey } from '@solana/web3.js';
 import { Button } from '@/components/ui/button';
@@ -29,7 +29,8 @@ import { parseReferralData } from '@/lib/utils/referral-qrcode';
  */
 export function ClaimForm() {
   // Access to the user's Solana wallet
-  const { publicKey, connected, signTransaction, sendTransaction } = useWallet();
+  const wallet = useSafeWallet();
+  const { publicKey, connected, signTransaction, sendTransaction } = wallet || {};
   // Get URL parameters (used for direct claim links)
   const searchParams = useSearchParams();
   const router = useRouter();
