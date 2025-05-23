@@ -19,7 +19,7 @@ import { toast } from 'sonner';
  * ClaimForm Component
  * Handles the token claiming process, supporting both direct input and URL-based claiming
  */
-export function ClaimForm() {
+export function ClaimForm(): React.JSX.Element {
   // Access to the user's Solana wallet
   const { publicKey, connected, signTransaction, sendTransaction } = useWallet();
   // Get URL parameters (used for direct claim links)
@@ -220,12 +220,18 @@ export function ClaimForm() {
             </div>
           )}
         </CardContent>
-        <CardFooter>
-          <Button
+        <CardFooter className="flex justify-between">
+          <Button 
+            variant="outline" 
             onClick={() => router.push('/')}
-            className="w-full"
           >
-            Return to Home
+            Back to Home
+          </Button>
+          <Button 
+            className="bg-primary text-white hover:bg-primary/90"
+            onClick={() => window.open(`https://explorer.solana.com/address/${eventDetails?.mint || ''}?cluster=${DEFAULT_CLUSTER}`, '_blank')}
+          >
+            View on Explorer
           </Button>
         </CardFooter>
       </Card>
@@ -282,7 +288,7 @@ export function ClaimForm() {
                           // Create a synthetic event object that's compatible with our handler
                           const syntheticEvent = {
                             preventDefault: () => {}
-                          } as React.FormEvent;
+                          } as unknown as React.FormEvent;
                           handleSubmit(syntheticEvent);
                         }, 500);
                       }
@@ -385,7 +391,7 @@ export function ClaimForm() {
               </p>
             </div>
           </form>
-        )}
+        ) : null}
       </CardContent>
       <CardFooter className="flex justify-end">
         <Button
