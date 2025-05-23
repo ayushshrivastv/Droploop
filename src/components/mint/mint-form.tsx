@@ -1,15 +1,15 @@
 /**
  * @file mint-form.tsx
- * @description MintForm component for creating and minting compressed tokens for referral campaigns
- * This component handles the entire referral campaign creation process including collecting campaign details,
- * minting referral tokens with ZK compression, and generating QR codes for referrers to share.
+ * @description MintForm component for creating and minting compressed tokens for events
+ * This component handles the entire token creation process including collecting event details,
+ * minting tokens, and generating QR codes for claiming the tokens.
  */
 
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useSafeWallet } from '@/hooks/use-safe-wallet';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -22,8 +22,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DEFAULT_TOKEN_DECIMALS } from '@/lib/constants';
 import type { MintFormData } from '@/lib/types';
 import { createCompressedTokenMint, mintCompressedTokens, createConnection } from '@/lib/utils/solana';
-import { Keypair } from '@solana/web3.js';
+import { Keypair, PublicKey } from '@solana/web3.js';
 import { createClaimUrl, createSolanaPayUrl, createSolanaPayClaimUrl, generateQrCodeDataUrl } from '@/lib/utils/qrcode';
+import { toast } from 'sonner';
 
 /**
  * Type definition for form values inferred from the Zod schema
@@ -35,20 +36,18 @@ type FormValues = z.infer<typeof formSchema>;
  * Defines the structure and validation rules for the form data
  */
 const formSchema = z.object({
-  // Campaign Details
-  campaignName: z.string().min(3, { message: "Campaign name must be at least 3 characters" }),
-  campaignDescription: z.string().min(10, { message: "Description must be at least 10 characters" }),
-  campaignEndDate: z.string().min(1, { message: "End date is required" }),
+  // Event Details
+  eventName: z.string().min(3, { message: "Event name must be at least 3 characters" }),
+  eventDescription: z.string().min(10, { message: "Description must be at least 10 characters" }),
+  eventDate: z.string().min(1, { message: "Event date is required" }),
+  eventLocation: z.string().optional(),
   organizerName: z.string().min(2, { message: "Organizer name is required" }),
-  targetReferrals: z.coerce.number().int().positive().optional(),
-  
+  maxAttendees: z.coerce.number().int().positive().optional(),
   // Token Metadata
   tokenName: z.string().min(3, { message: "Token name must be at least 3 characters" }),
   tokenSymbol: z.string().min(2, { message: "Token symbol must be at least 2 characters" }),
   tokenDescription: z.string().min(10, { message: "Token description must be at least 10 characters" }),
   tokenImage: z.string().url({ message: "Please enter a valid URL" }).optional(),
-  referrerReward: z.coerce.number().int().positive({ message: "Reward must be a positive number" }),
-  refereeReward: z.coerce.number().int().positive({ message: "Reward must be a positive number" }),
   tokenSupply: z.coerce.number().int().positive({ message: "Supply must be a positive number" }),
 });
 
@@ -58,44 +57,41 @@ const formSchema = z.object({
  * Includes form validation, on-chain token creation, and QR code generation
  */
 export function MintForm() {
+  // Always call hooks unconditionally in the same order
+  const wallet = useWallet();
   const [isClient, setIsClient] = useState(false);
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    setIsClient(true);
-    
-    // Check for tab parameter in URL and switch to campaign tab if specified
-    const tabParam = searchParams.get('tab');
-    if (tabParam === 'campaign') {
-      setActiveTab('campaign');
-    }
-  }, [searchParams]);
-
-  const wallet = useSafeWallet();
-  const { publicKey, connected, signTransaction, sendTransaction } = wallet || {};
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("event"); // Default tab is event
+  const [activeTab, setActiveTab] = useState("event");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mintSuccess, setMintSuccess] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [claimUrl, setClaimUrl] = useState<string | null>(null);
 
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Extract wallet properties safely - only use them when client-side
+  const publicKey = isClient ? wallet.publicKey : null;
+  const connected = isClient ? wallet.connected : false;
+  const signTransaction = isClient ? wallet.signTransaction : null;
+  const sendTransaction = isClient ? wallet.sendTransaction : null;
+
   // Initialize form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      campaignName: "",
-      campaignDescription: "",
-      campaignEndDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
+      eventName: "",
+      eventDescription: "",
+      eventDate: new Date().toISOString().split('T')[0],
+      eventLocation: "",
       organizerName: "",
-      targetReferrals: 100,
+      maxAttendees: 100,
       tokenName: "",
-      tokenSymbol: "DROP",
+      tokenSymbol: "POP",
       tokenDescription: "",
       tokenImage: "https://picsum.photos/300/300", // Placeholder image
-      referrerReward: 2,
-      refereeReward: 1,
-      tokenSupply: 500,
+      tokenSupply: 100,
     },
   });
 
@@ -106,118 +102,140 @@ export function MintForm() {
   /**
    * Form submission handler
    * Executes the token creation process using the form data
-   * 
+   *
    * @param values - Form values collected from the user input
    */
   const onSubmit = async (values: FormValues) => {
     if (!connected || !publicKey) {
-      alert("Please connect your wallet first");
+      toast.error("Wallet Not Connected", {
+        description: "Please connect your wallet first."
+      });
       return;
     }
 
-    try {
-      setIsSubmitting(true);
+    setIsSubmitting(true);
+    // Variables to store token creation results
+    let mint: PublicKey;
+    let createSignature: string;
+    let mintSignature: string;
 
-      // Format data for token minting
+    try {
       const mintData: MintFormData = {
         eventDetails: {
-          name: values.campaignName,
-          description: values.campaignDescription,
-          date: values.campaignEndDate,
-          location: "Online", // Default to online for referral campaigns
+          name: values.eventName,
+          description: values.eventDescription,
+          date: values.eventDate,
+          location: values.eventLocation || '',
           organizerName: values.organizerName,
-          maxAttendees: values.targetReferrals || 1000, // Use targetReferrals as maxAttendees
+          maxAttendees: values.maxAttendees || 0,
         },
         tokenMetadata: {
           name: values.tokenName,
           symbol: values.tokenSymbol,
           description: values.tokenDescription,
-          image: values.tokenImage,
-          attributes: [
-            { trait_type: "Campaign", value: values.campaignName },
-            { trait_type: "Date", value: values.campaignEndDate },
-            { trait_type: "Organizer", value: values.organizerName },
-          ],
+          image: values.tokenImage || '', // Ensure image is always a string
+          // attributes: [] // Add if necessary, based on TokenAttribute definition
         },
         supply: values.tokenSupply,
         decimals: DEFAULT_TOKEN_DECIMALS,
       };
 
       console.log("Creating token mint with data:", mintData);
-      
-      // Get config from environment variables or use defaults
-      const rpcEndpoint = process.env.NEXT_PUBLIC_RPC_ENDPOINT || "https://api.devnet.solana.com";
-      const appConfig = { 
-        rpcEndpoint,
-        cluster: process.env.NEXT_PUBLIC_CLUSTER as "devnet" | "mainnet-beta" | "testnet" | "localnet" || "devnet"
-      };
-      
-      // We need a keypair for signing transactions
-      // In a real app, this would come from the user's wallet
-      // For testing, we'll use a generated keypair
-      // WARNING: In production, never expose private keys on the client side!
-      const payerKeypair = /*window.solana.signTransaction ? await window.solana._keypair :*/ new Keypair(); // Temporary for testing
-      
-      // 1. Create the compressed token mint
-      console.log("Creating compressed token mint...");
-      const { mint, signature: createSignature } = await createCompressedTokenMint(
-        createConnection(appConfig),
-        payerKeypair, // Payer/wallet
-        publicKey, // Mint authority
-        mintData.decimals,
-        mintData.tokenMetadata.name,
-        mintData.tokenMetadata.symbol,
-        mintData.tokenMetadata.image || "https://arweave.net/placeholder", // Token URI/image
-      );
-      
-      console.log("Token mint created with address:", mint.toBase58());
-      console.log("Creation signature:", createSignature);
-      
-      // 2. Mint tokens to the organizer's wallet
-      console.log("Minting tokens to organizer wallet...");
-      const { signature: mintSignature } = await mintCompressedTokens(
-        createConnection(appConfig),
-        payerKeypair, // Payer
-        mint, // Mint address
-        publicKey, // Destination (organizer's wallet)
-        payerKeypair, // Mint authority
-        mintData.supply, // Amount to mint
-      );
-      
+
+      // Call our server-side API endpoint
+      const response = await fetch('/api/token/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mintData,
+          destinationWallet: publicKey.toBase58(), // The user's wallet address
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.error("Server-side token creation failed:", result);
+        let errorMessage = "An unknown error occurred.";
+        if (result && result.error) {
+          errorMessage = result.error;
+        } else if (result && result.message) {
+          errorMessage = result.message;
+        }
+
+        if (errorMessage.includes("insufficient lamports") || errorMessage.includes("balance is insufficient")) {
+          toast.error("Token Creation Failed", {
+            description: "The admin wallet has insufficient SOL to perform this transaction. Please add more SOL and try again.",
+            duration: 7000
+          });
+        } else if (errorMessage.includes("RPC method not found")) {
+          toast.error("Network Error", {
+            description: "There seems to be an issue with the Solana RPC endpoint. Please try again later or check your network settings.",
+            duration: 7000
+          });
+        } else {
+          toast.error("Error Creating Token", {
+            description: errorMessage
+          });
+        }
+        // No return here, finally will set isSubmitting to false
+        throw new Error(errorMessage); // throw to be caught by outer catch
+      }
+
+      console.log("Server-side token creation successful:", result);
+
+      // Validate that we have a valid mint address before creating a PublicKey
+      if (!result.mint || typeof result.mint !== 'string' || result.mint.trim() === '') {
+        throw new Error('Invalid or missing mint address in the API response');
+      }
+
+      try {
+        mint = new PublicKey(result.mint);
+        createSignature = result.createSignature || 'mock-signature';
+        mintSignature = result.mintSignature || 'mock-signature';
+
+        console.log("Token mint created with address:", mint.toBase58());
+        console.log("Creation signature:", createSignature);
+        console.log("Mint signature:", mintSignature);
+      } catch (error) {
+        console.error("Error creating PublicKey from response:", error);
+        throw new Error('Failed to process the mint address returned from the server');
+      }
       console.log("Tokens minted successfully, signature:", mintSignature);
-      
-      // 3. Generate both standard claim URL and Solana Pay URL
+
       const baseUrl = window.location.origin;
-      
-      // Standard claim URL for direct web access
       const standardClaimUrl = createClaimUrl(
         baseUrl,
-        values.campaignName, // Use campaign name as the campaignId
-        mint // Pass the PublicKey directly, not as a string
+        values.eventName,
+        mint
       );
-      
-      // Solana Pay URL for wallet interaction
       const solanaPayUrl = createSolanaPayClaimUrl(
-        publicKey, // The organizer's wallet as recipient
-        mint, // The token mint
-        values.campaignName, // Campaign name as label
-        `Claim your ${values.tokenName} token for ${values.campaignName}` // Memo message
+        publicKey,
+        mint,
+        values.eventName,
+        `Claim your ${values.tokenName} token for ${values.eventName}`
       );
-      
+
       console.log('Generated Standard Claim URL:', standardClaimUrl);
       console.log('Generated Solana Pay URL:', solanaPayUrl);
-      
-      // Store the standard URL for display and copy purposes
       setClaimUrl(standardClaimUrl);
-      
-      // Create QR code with the Solana Pay URL for direct wallet interaction
+
       const qrCodeDataUrl = await generateQrCodeDataUrl(solanaPayUrl);
       setQrCodeUrl(qrCodeDataUrl);
-      
       setMintSuccess(true);
+
     } catch (error) {
-      console.error("Error minting token:", error);
-      alert(`Error minting token: ${error instanceof Error ? error.message : String(error)}`);
+      // Handle errors from fetch, QR code generation, or explicitly thrown errors
+      // Toasts are expected to be shown where the error originates or is specifically handled (like response.ok check)
+      // This catch block is more of a fallback.
+      console.error("Error in onSubmit process:", error);
+      if (!(error instanceof Error && (error.message.includes("insufficient lamports") || error.message.includes("RPC method not found")))) {
+        // Avoid double-toasting if already handled by specific checks
+        toast.error("Token Creation Error", {
+          description: `Failed to create tokens: ${error instanceof Error ? error.message : 'An unexpected error occurred'}`,
+          duration: 7000
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -228,17 +246,16 @@ export function MintForm() {
     setActiveTab(value);
   };
 
+  // Handle next button in event details tab
   const handleNextTab = () => {
-    // Validate only the fields in the current tab before proceeding
-    if (activeTab === "campaign") {
-      const campaignFields = ["campaignName", "campaignDescription", "campaignEndDate", "organizerName"];
-      const hasErrors = campaignFields.some(fieldName => {
-        return form.getFieldState(fieldName as any).invalid;
-      });
-      
-      if (!hasErrors) {
-        setActiveTab("token");
-      }
+    const eventFields = ["eventName", "eventDescription", "eventDate", "organizerName"];
+    const isValid = eventFields.every(field => {
+      const result = form.trigger(field as keyof FormValues);
+      return result;
+    });
+
+    if (isValid) {
+      setActiveTab("token");
     }
   };
 
@@ -248,11 +265,11 @@ export function MintForm() {
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-green-800 animate-slide-up">
           <h3 className="font-semibold text-lg flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 001.414-1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
             Token Created Successfully!
           </h3>
-          <p className="mt-1">Your referral campaign tokens have been minted and are ready to be claimed.</p>
+          <p className="mt-1">Your event tokens have been minted and are ready to be claimed.</p>
         </div>
 
         <Card className="p-6 card-hover animate-slide-up" style={{animationDelay: '100ms'}}>
@@ -263,19 +280,16 @@ export function MintForm() {
               </svg>
               Claim QR Code
             </h3>
-            <p className="text-muted-foreground">Users can scan this QR code with any Solana Pay compatible wallet</p>
-            
+            <p className="text-muted-foreground">Attendees can scan this QR code with any Solana Pay compatible wallet</p>
             <div className="flex justify-center my-6">
               <div className="border border-border p-4 rounded-lg inline-block bg-white shadow-lg transition-all hover:shadow-xl">
                 <img src={qrCodeUrl} alt="Solana Pay QR Code" width={250} height={250} className="animate-fade-in" />
               </div>
             </div>
-            
             <div className="bg-muted p-3 rounded-md text-sm">
               <p className="font-medium mb-1">💡 How It Works</p>
               <p className="text-muted-foreground text-xs">This QR code contains a Solana Pay URL that will trigger a token claim transaction when scanned with a compatible wallet app like Phantom or Solflare.</p>
             </div>
-            
             {claimUrl && (
               <div className="mt-4">
                 <p className="text-sm text-muted-foreground mb-2">Claim URL:</p>
@@ -284,7 +298,6 @@ export function MintForm() {
                 </div>
               </div>
             )}
-            
             <div className="flex justify-center gap-4 mt-6">
               <Button variant="outline" className="transition-all hover:bg-secondary" onClick={() => {
                 if (qrCodeUrl) {
@@ -314,59 +327,55 @@ export function MintForm() {
     );
   }
 
-  // When using FormProvider, we need to pass it as a component rather than using it directly
-  // This ensures the children prop is properly handled
   return (
-    // @ts-ignore - Form component expects children which we're providing
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 animate-fade-in">
-        <Tabs defaultValue="campaign" value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid grid-cols-2 mb-6">
-            <TabsTrigger value="campaign">Campaign Details</TabsTrigger>
-            <TabsTrigger value="token">Token Details</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="event">Event Details</TabsTrigger>
+            <TabsTrigger value="token">Token Configuration</TabsTrigger>
           </TabsList>
-          
-          {/* Campaign Details Tab */}
-          <TabsContent value="campaign" className="space-y-4">
+          {/* Event Details Tab */}
+          <TabsContent value="event" className="space-y-4">
             <FormField
               control={form.control}
-              name="campaignName"
+              name="eventName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Campaign Name</FormLabel>
+                  <FormLabel>Event Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Droploop Community Growth" {...field} />
+                    <Input placeholder="Solana Hackathon 2025" {...field} />
                   </FormControl>
+                  <FormDescription>The name of your event</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
             <FormField
               control={form.control}
-              name="campaignDescription"
+              name="eventDescription"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Campaign Description</FormLabel>
+                  <FormLabel>Event Description</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Reward users for inviting friends to join Droploop" 
+                    <Textarea
+                      placeholder="Join us for an exciting hackathon..."
                       className="min-h-[100px]"
-                      {...field} 
+                      {...field}
                     />
                   </FormControl>
+                  <FormDescription>Describe your event</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="campaignEndDate"
+                name="eventDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Campaign End Date</FormLabel>
+                    <FormLabel>Event Date</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -374,7 +383,21 @@ export function MintForm() {
                   </FormItem>
                 )}
               />
-              
+              <FormField
+                control={form.control}
+                name="eventLocation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Location (Optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="San Francisco, CA" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="organizerName"
@@ -382,56 +405,52 @@ export function MintForm() {
                   <FormItem>
                     <FormLabel>Organizer Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Your name or organization" {...field} />
+                      <Input placeholder="Solana Foundation" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="maxAttendees"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Max Attendees (Optional)</FormLabel>
+                    <FormControl>
+                      <Input type="number" min="1" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            
-            <FormField
-              control={form.control}
-              name="targetReferrals"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Target Referrals (Optional)</FormLabel>
-                  <FormControl>
-                    <Input type="number" min="1" placeholder="100" {...field} />
-                  </FormControl>
-                  <FormDescription>Your goal for number of successful referrals</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
             <div className="flex justify-end mt-6">
-              <Button 
-                type="button" 
+              <Button
+                type="button"
                 onClick={handleNextTab}
                 className="bg-white text-black hover:bg-slate-100 transition-all"
               >
-                Next: Token Details
+                Next: Token Configuration
               </Button>
             </div>
           </TabsContent>
-          
-          {/* Token Details Tab */}
+          {/* Token Configuration Tab */}
           <TabsContent value="token" className="space-y-4">
             <FormField
               control={form.control}
               name="tokenName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Referral Token Name</FormLabel>
+                  <FormLabel>Token Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Droploop Referral Token" {...field} />
+                    <Input placeholder="Solana Hackathon Token" {...field} />
                   </FormControl>
+                  <FormDescription>The name of your token</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -440,13 +459,12 @@ export function MintForm() {
                   <FormItem>
                     <FormLabel>Token Symbol</FormLabel>
                     <FormControl>
-                      <Input placeholder="DROP" {...field} />
+                      <Input placeholder="POP" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
               <FormField
                 control={form.control}
                 name="tokenSupply"
@@ -456,45 +474,12 @@ export function MintForm() {
                     <FormControl>
                       <Input type="number" min="1" {...field} />
                     </FormControl>
-                    <FormDescription>Total tokens to mint for this campaign</FormDescription>
+                    <FormDescription>Number of tokens to mint</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="referrerReward"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Referrer Reward</FormLabel>
-                    <FormControl>
-                      <Input type="number" min="1" {...field} />
-                    </FormControl>
-                    <FormDescription>Tokens earned per successful referral</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="refereeReward"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>New User Reward</FormLabel>
-                    <FormControl>
-                      <Input type="number" min="1" {...field} />
-                    </FormControl>
-                    <FormDescription>Tokens given to newly referred users</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
             <FormField
               control={form.control}
               name="tokenDescription"
@@ -502,17 +487,16 @@ export function MintForm() {
                 <FormItem>
                   <FormLabel>Token Description</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="This token represents participation in the Droploop referral program" 
+                    <Textarea
+                      placeholder="This token verifies attendance at the Solana Hackathon 2025"
                       className="min-h-[100px]"
-                      {...field} 
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
             <FormField
               control={form.control}
               name="tokenImage"
@@ -527,14 +511,13 @@ export function MintForm() {
                 </FormItem>
               )}
             />
-            
             <div className="flex justify-between mt-6">
-              <Button type="button" variant="outline" onClick={() => setActiveTab("campaign")}>
+              <Button type="button" variant="outline" onClick={() => setActiveTab("event")}>
                 Back to Event Details
               </Button>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting} 
+              <Button
+                type="submit"
+                disabled={isSubmitting}
                 className="relative transition-all bg-white text-black hover:bg-slate-100"
               >
                 {isSubmitting ? (
@@ -544,7 +527,7 @@ export function MintForm() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Creating Campaign...
+                      Creating Token...
                     </span>
                   </>
                 ) : (
@@ -552,7 +535,7 @@ export function MintForm() {
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414-1.414L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 001.414-1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
-                    Create Campaign
+                    Create Token
                   </span>
                 )}
               </Button>
