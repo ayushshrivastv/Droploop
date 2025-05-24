@@ -59,9 +59,9 @@ Business owners and creators can log in with their Solana wallet, create a new r
 
 The user interface is built to be intuitive across devices and accommodates both the program creator and referrer journeys—from creating programs to claiming rewards—with minimal friction.
 
-<img src="https://github.com/user-attachments/assets/8fe8ead1-4c91-46c9-baaa-14aab625c1c3" width="600">
+<img src="https://github.com/user-attachments/assets/8fe8ead1-4c91-46c9-baaa-14aab625c1c3" width="800">
 
-<img src="https://github.com/user-attachments/assets/8fe8ead1-4c91-46c9-baaa-14aab625c1c3" style="width: 600px;">
+<img src="https://github.com/user-attachments/assets/8fe8ead1-4c91-46c9-baaa-14aab625c1c3" style="width: 800px;">
 
 
 ### Seamless Connection of Wallet to Collect Event Tokens.
