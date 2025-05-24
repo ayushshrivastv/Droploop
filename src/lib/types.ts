@@ -31,6 +31,27 @@ export interface MintFormData {
   decimals: number;
 }
 
+export interface ProgramDetails {
+  name: string;
+  description: string;
+  endDate: string; // ISO date string
+  creatorName: string;
+}
+
+export interface RewardDetails {
+  amount: number;
+  currency: string;
+  maxReferrals: number;
+}
+
+export interface ReferralProgramData {
+  programDetails: ProgramDetails;
+  rewardDetails: RewardDetails;
+  nftMetadata: TokenMetadata;
+  supply: number;
+  decimals: number;
+}
+
 export interface ClaimData {
   mint: PublicKey;
   eventId: string;

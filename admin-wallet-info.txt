@@ -1,0 +1,9 @@
+
+Admin Wallet Information
+------------------------
+Public Key: AkYLYzNuANWtySgXZt6JEcrA9f8q6ieZypR6Jc8MGWZ3
+Current Balance: 0 SOL
+Required Balance: 3+ SOL
+
+Fund this wallet using the faucets mentioned in the console output.
+  

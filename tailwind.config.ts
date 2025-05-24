@@ -52,6 +52,10 @@ export default {
           '5': 'hsl(var(--chart-5))'
         }
       },
+      fontFamily: {
+        fredoka: ['var(--font-fredoka)', 'sans-serif'],
+        'sf-pro': ['-apple-system', 'BlinkMacSystemFont', 'San Francisco', 'SF Pro Text', 'SF Pro', 'system-ui', 'sans-serif'],
+      },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',

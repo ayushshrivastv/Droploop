@@ -2,23 +2,14 @@
 
 import React, { FC, ReactNode, useMemo, useState, useEffect, useCallback } from 'react';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
-import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
-import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { 
-  PhantomWalletAdapter,
+  ConnectionProviderWrapper as ConnectionProvider,
+  WalletProviderWrapper as WalletProvider,
+  WalletModalProviderWrapper as WalletModalProvider
+} from '@/components/providers/wallet-adapter-wrapper';
+import { 
   SolflareWalletAdapter,
-  TorusWalletAdapter,
-  LedgerWalletAdapter,
-  CoinbaseWalletAdapter,
-  CloverWalletAdapter,
-  MathWalletAdapter,
-  SolongWalletAdapter,
-  Coin98WalletAdapter,
-  AlphaWalletAdapter,
-  AvanaWalletAdapter,
-  BitKeepWalletAdapter,
-  BitpieWalletAdapter,
-  TrustWalletAdapter
+  TorusWalletAdapter
 } from '@solana/wallet-adapter-wallets';
 import { DEVNET_RPC_ENDPOINT, MAINNET_RPC_ENDPOINT } from '@/lib/constants';
 
@@ -60,22 +51,15 @@ export const IsolatedWalletProvider: FC<IsolatedWalletProviderProps> = ({ childr
   const wallets = useMemo(() => {
     const now = performance.now();
     console.log(`[PW] IsolatedWalletProvider: useMemo (wallets) at ${now.toFixed(0)}ms. Network: ${network}`);
-    return [
-      new PhantomWalletAdapter(),
-      new SolflareWalletAdapter({ network }),
-      new CoinbaseWalletAdapter(),
-      new LedgerWalletAdapter(),
-      new TorusWalletAdapter(),
-      new SolongWalletAdapter(),
-      new CloverWalletAdapter(),
-      new MathWalletAdapter(),
-      new Coin98WalletAdapter(),
-      new AlphaWalletAdapter(),
-      new AvanaWalletAdapter(),
-      new BitKeepWalletAdapter(),
-      new BitpieWalletAdapter(),
-      new TrustWalletAdapter()
-    ];
+    try {
+      return [
+        new SolflareWalletAdapter({ network }),
+        new TorusWalletAdapter(),
+      ];
+    } catch (error) {
+      console.error('[PW] Error initializing wallet adapters:', error);
+      return [];
+    }
   }, [network]);
 
   useEffect(() => {
@@ -111,9 +95,11 @@ export const IsolatedWalletProvider: FC<IsolatedWalletProviderProps> = ({ childr
     <ConnectionProvider endpoint={rpcEndpoint}>
       <WalletProvider 
         wallets={wallets} 
-        autoConnect={true}
+        autoConnect={false} // Disable autoConnect to prevent Origin not approved errors
         onError={(error) => {
           console.error('[PW] IsolatedWalletProvider: WalletProvider onError:', error);
+          
+          // Handle specific error types with more user-friendly messages
           if (error.name === 'WalletNotReadyError') {
             console.debug('[PW] WalletProvider onError: WalletNotReadyError, will retry automatically');
             return;
@@ -124,6 +110,11 @@ export const IsolatedWalletProvider: FC<IsolatedWalletProviderProps> = ({ childr
           }
           if (error.name === 'WalletConnectionError') {
             console.warn('[PW] WalletProvider onError: WalletConnectionError:', error.message);
+            
+            // Special handling for Origin not approved errors
+            if (error.message.includes('Origin not approved')) {
+              console.log('[PW] Origin not approved error. User needs to approve the connection in their wallet.');
+            }
             return;
           }
           if (error.name === 'WalletDisconnectedError') {

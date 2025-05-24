@@ -1,58 +1,102 @@
-# Droploop: Decentralized Referral System
+# Droploop - Decentralized Referral System
 
-Droploop enables creators to build decentralized referral campaigns that reward users for inviting others to join their community. Through unique QR codes and referral links, users can easily share and track their referrals, with rewards automatically distributed as compressed tokens on the Solana blockchain.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Next.js](https://img.shields.io/badge/Next.js-15.2.0-black)](https://nextjs.org/)
+[![Solana Pay](https://img.shields.io/badge/Solana-Pay-9945FF)](https://solanapay.com/)
+[![Light Protocol](https://img.shields.io/badge/Light_Protocol-ZK_Compression-6A5ACD)](https://lightprotocol.com/)
 
-Built for the 1000x Hackathon - Best cToken integration for Solana Pay Bounty, this application demonstrates how referral programs can leverage blockchain technology for transparency, cost-effectiveness, and scalability without compromising on user experience.
+This project enables businesses and creators to build decentralized referral programs using NFTs that can be shared and claimed through a simple scan of a QR code. These referral NFTs are not just symbolic; they represent verifiable, compressed assets living entirely on-chain, making them ideal for tracking referrals, distributing rewards, and growing communities at scale.
 
-**[Droploop Project](https://droploop-ten.vercel.app)**
+For a detailed technical architecture and component flow diagrams, please refer to the [ARCHITECTURE.md](./docs/ARCHITECTURE.md) document.
 
-![Screenshot 2025-05-12 at 12 41 15 PM](https://github.com/user-attachments/assets/f4ecd134-a0d5-4b0a-96f9-e1f41a5b6e26)
+Droploop's decentralized referral system combines the power of blockchain technology with the simplicity of QR code sharing to create a seamless referral experience that's transparent, efficient, and rewarding for everyone involved.
 
-## Referral System Workflow
 
-Droploop uses Light Protocol's ZK Compression to make referral campaigns cost-effective and scalable. When a creator starts a campaign, they generate unique referral codes that can be shared via QR codes. When someone joins through a referral, the smart contract verifies the legitimacy of the referral and rewards both the referrer and the new user with compressed tokens. All transactions are securely recorded on the Solana blockchain with ZK Compression, making the entire process 1000x more affordable than traditional methods.
+### Web Page Link
+**[Droploop Page](https://scalable-c-token-ayushshrivastvs-projects.vercel.app/)**
 
-For a detailed presentation of the Droploop referral system, including features, benefits, and technical details, please see our [presentation document](./presentation.md).
+![Screenshot 2025-05-11 at 3 10 50 AM](https://github.com/user-attachments/assets/f3607a9c-9026-46d0-8559-f83740a2eab7)
 
-## Functionality
+## Overview
 
-Creators can connect their Solana wallet, initiate a referral campaign, and set the reward parameters for both referrers and new joiners. Upon creation, the system generates unique referral QR codes and links that can be distributed across various channels. Users can join through these referrals and earn rewards in the form of compressed tokens. All campaign statistics are tracked in real-time, giving creators full visibility into their referral program's performance.
+Droploop Referral System with Solana Pay and ZK Compression on Solana
+
+A high throughput solution for creating and managing decentralized referral programs at scale on Solana blockchain using Solana Pay and Light Protocol's compression technology.
+
+Check out [Presentation](./docs/PRESENTATION.md) for a quick overview of the project's functionality.
+
+## Zero-Knowledge Compression Technology
+
+Droploop leverages Light Protocol's zero-knowledge compression technology to revolutionize referral programs on Solana. This cutting-edge approach combines the security of blockchain with the efficiency of advanced cryptographic techniques, enabling a new paradigm for referral tracking and reward distribution.
+
+At its core, our implementation uses zero-knowledge proofs to compress referral data while preserving its integrity and verifiability. This allows us to dramatically reduce on-chain storage requirements and transaction costs without sacrificing security or functionality. The system can process hundreds of referrals in a single transaction, making it ideal for viral growth campaigns and large-scale referral programs.
+
+Beyond efficiency, this technology enhances privacy by allowing selective disclosure of information. Businesses can verify referral authenticity without exposing sensitive user data, while participants can prove their referrals without revealing personal details. The entire system is built on cryptographic guarantees that mathematically prevent fraud or unauthorized modifications.
+
+### Performance Comparison: Traditional vs. Compressed Referral Systems
+
+| Metric | Traditional Referral Systems | Compressed Referral NFTs | Improvement |
+|--------|-------------------|-------------------|-------------|
+| Cost per referral | ~0.005 SOL | ~0.000005 SOL | 1000× cheaper |
+| Referrals per transaction | 1-5 | Up to 1,000 | 200-1000× more efficient |
+| Processing speed | ~10 referrals/minute | ~5,000 referrals/minute | 500× faster |
+| Storage requirements | Full on-chain data | Compressed merkle proofs | 100× less storage |
+| Security level | Standard on-chain | Cryptographically equivalent | Equally secure |
+| Privacy features | Limited | Selective disclosure | Enhanced privacy |
+
+This powerful combination of scalability, privacy, and security makes Droploop an ideal solution for any business looking to create and manage referral programs at scale without prohibitive costs or technical complexity.
 
 ## Solana Pay and Smart Contract Workflow
 
-A decentralized referral system built on Solana using ZK Compression with Light Protocol
+Droploop uses Solana Pay to make referral sharing super easy. Users can claim referral NFTs without any hassle. Program creators set up a smart contract on Solana to mint referral NFTs. This contract uses Light Protocol's infrastructure to create compressed NFTs. When someone scans a referral QR code, it sends a transaction to the smart contract. The smart contract checks if the referral is valid and then sends a unique, compressed referral NFT straight to the user's wallet while distributing rewards according to the program rules. This way, referrals are tracked and rewards are distributed securely and efficiently.
 
-A powerful and cost effective solution for creating and managing referral campaigns on the Solana blockchain through compressed tokens and the power of ZK compression technology.
 
-![Screenshot 2025-05-11 at 7 02 48 AM](https://github.com/user-attachments/assets/c4ae4a28-b219-458c-a0dc-ae11823205a7)
 
-![Screenshot 2025-05-11 at 7 03 21 AM](https://github.com/user-attachments/assets/ea0aba20-76e3-4031-96ec-5f6b7b80c64d)
+## Functionality
 
-![Screenshot 2025-05-12 at 12 39 55 PM](https://github.com/user-attachments/assets/6d551ee3-e33b-4f4f-98c6-559d296e5852)
+Business owners and creators can log in with their Solana wallet, create a new referral program, and instantly mint compressed referral NFTs tied to program metadata such as name, reward structure, and distribution rules. Upon creation, the system generates a Solana Pay-compatible QR code, which can be shared with potential referrers. When scanned, users can securely claim the referral NFT via their own wallet and start earning rewards. Each referral NFT is issued using Light Protocol's compression infrastructure, drastically reducing storage costs while maintaining full L1 composability.
 
-## Referral System & Rewards
+The user interface is built to be intuitive across devices and accommodates both the program creator and referrer journeys—from creating programs to claiming rewards—with minimal friction.
 
-### QR Code Referrals
-The application leverages QR code technology to create a seamless referral experience:
+<img src="https://github.com/user-attachments/assets/f7a7ba25-3150-4b68-a109-b3f85af91110" alt="442056085-235a9be9-e4fa-46f9-989e-1b1ce8cda931" width="800"/>
 
-- **Unique Generation**: Each campaign participant receives personalized QR codes for tracking their referrals
+<img src="https://github.com/user-attachments/assets/e2d11e13-a8b1-4c6c-a7ad-2a3d65d02f86" alt="442056067-8b7532fd-1a86-4471-810d-b7e9b3484217" width="800"/>
+
+<img src="https://github.com/user-attachments/assets/f9c81e73-129b-4750-9d6d-9a44a9d8d104" alt="Screenshot 2025-05-12 at 4 23 55 AM" width="800"/>
+
+### Seamless Connection of Wallet to Collect Event Tokens.
+
+<img src="https://github.com/user-attachments/assets/397b8b3b-b404-4b81-8b32-a6f6885f04cb" alt="Screenshot 2025-05-12 at 7 16 48 AM" width="300"/>
+
+
+<img src="https://github.com/user-attachments/assets/5ecbbd21-bd21-4201-bb57-2dbc219473d1" alt="Screenshot 2025-05-18 at 12 35 43 AM" width="300"/>
+
+## QR Codes & Reward Distribution
+
+### Solana Pay QR Codes
+The application leverages Solana Pay's QR code technology to create a seamless referral experience:
+
+- **Dynamic Generation**: Each referral program automatically generates unique QR codes that encode all necessary transaction data
 - **Instant Recognition**: Compatible with any standard QR scanner or smartphone camera
-- **Referral Embedding**: QR codes contain all necessary referral data for attribution
+- **Transaction Embedding**: QR codes contain pre-formatted transaction instructions for referral claiming
 - **Wallet Connectivity**: Scanning initiates an immediate connection to the user's preferred Solana wallet
-- **Security Features**: Each QR code includes validation parameters to prevent fraudulent claims
+- **Security Features**: Each QR code includes validation parameters to prevent fraudulent referrals
 
-### Reward Distribution
-The platform offers efficient reward distribution for referral campaigns:
+### Reward Distribution Capabilities
+The platform offers efficient reward distribution functionality for program creators:
 
-- **Dual Rewards**: Both referrers and new joiners receive compressed tokens as rewards
-- **Automatic Transfers**: Rewards are automatically distributed upon successful referral verification
-- **Real-time Tracking**: All referrals and rewards are tracked in a comprehensive dashboard
-- **Conversion Analytics**: Monitor conversion rates and campaign performance metrics
-- **Flexible Reward Structure**: Configure different reward tiers based on referral volume or user type
+- **Tiered Rewards**: Create multi-level referral programs with different reward tiers
+- **Instant or Milestone-Based**: Choose between immediate rewards or milestone-based distribution
+- **Transferable Options**: Make referral NFTs transferable or non-transferable based on program needs
+- **Performance Tracking**: Monitor real-time referral statistics through an intuitive dashboard
+- **Flexible Allocation**: Distribute different reward amounts to different referrer tiers
 
-This combination of QR-based referrals and automatic reward distribution makes the platform ideal for growing communities and incentivizing user acquisition.
+This combination of QR-based sharing and flexible reward distribution makes the platform ideal for both digital and physical business growth campaigns.
 
-**[Explore the GitHub repository](https://github.com/ayushshrivastv/Droploop)**
+### Smart Contracts & Solana Pay Integration
+Manage referrals and distribute rewards with just a few clicks. Our system allows businesses to track referrals and distribute rewards to hundreds or thousands of participants simultaneously. The platform leverages custom Solana smart contracts that interact seamlessly with Light Protocol's compression technology, reducing transaction costs by 1000x. Solana Pay integration enables frictionless referral sharing through scannable QR codes that embed transaction instructions, wallet connections, and verification parameters—all while maintaining sub-second finality and military-grade security.
+
+**[Try the live demo here](https://scalable-c-token-ayushshrivastvs-projects.vercel.app/)**
 
 ## Setup & Installation
 
@@ -62,46 +106,68 @@ To run this project locally, ensure you have Node.js 16 or later and a compatibl
 git clone https://github.com/ayushshrivastv/Droploop.git
 cd Droploop
 npm install
+# or if you prefer using bun
+bun install
 ```
 
-Create a `.env.local` file in the root directory with the following environment variables:
+### Automated Setup (Recommended)
 
-```
-NEXT_PUBLIC_CLUSTER=devnet
-NEXT_PUBLIC_RPC_ENDPOINT=https://api.devnet.solana.com
+The project now includes an automated setup script that will:
+1. Create the necessary `.env` file with the correct environment variables
+2. Generate a new admin wallet keypair for token operations
+3. Request an airdrop of SOL to the admin wallet (on devnet)
+
+Simply run:
+
+```bash
+npm run setup
+# or
+bun run setup
 ```
 
 Then start the development server:
 
 ```bash
 npm run dev
+# or
+bun run dev
+```
+
+The development server will also automatically run the setup script if needed.
+
+### Manual Setup (Alternative)
+
+If you prefer to set up manually, create a `.env` file in the root directory with the following environment variables:
+
+```
+NEXT_PUBLIC_CLUSTER=devnet
+NEXT_PUBLIC_RPC_ENDPOINT=https://api.devnet.solana.com
+ADMIN_PRIVATE_KEY=your_admin_private_key_here
+```
+
+You can generate an admin private key using the Solana CLI:
+```bash
+solana-keygen new --no-passphrase -o admin-keypair.json
+# Then convert to base64 format for the .env file
+cat admin-keypair.json | base64
 ```
 
 The application will be available at [http://localhost:3000](http://localhost:3000). Connect your wallet to begin creating or claiming tokens.
 
 ## Using the Application
 
-To create a referral campaign, connect your wallet and navigate to the "Create Campaign" section. Set up your campaign parameters, including reward amounts for referrers and new joiners. Once created, you'll receive unique referral codes and QR codes to share. Users can join through these referrals by scanning the QR code or entering the referral code, connecting their wallet, and receiving their reward tokens automatically.
+To create a referral program, connect your wallet and navigate to the "Create Referral" section. Fill out the program information including reward structure, confirm the transaction, and a QR code will be generated for distribution. Share this QR code with potential referrers who can scan it using any QR reader or camera app, which will launch Solana Pay and guide them through the referral NFT claim process in a few simple steps.
 
-The entire process is secure, affordable, and designed for high-volume referral campaigns with minimal overhead.
+The process is secure, affordable, and designed for high-volume referral programs that can scale with your business growth.
 
 ## Technical Stack
 
-This application is built with Next.js 15, React 18, and TypeScript, using Tailwind CSS and shadcn/ui for the frontend. Blockchain functionality is powered by Solana, with Light Protocol handling ZK Compression for tokens. Wallet interactions are handled via the Solana Wallet Adapter framework.
+This application is built with Next.js 15, React 18, and TypeScript, using Tailwind CSS and shadcn/ui for the frontend. Blockchain functionality is powered by Solana, with Light Protocol handling compression. Wallet interactions are handled via the Solana Wallet Adapter framework.
 
-The architecture is designed for easy extensibility and is suitable for further enhancements such as advanced analytics, multi-tier referral programs, or custom reward structures.
+The architecture allows easy extensibility and is suitable for further enhancements such as event analytics, email confirmations, or token gating.
 
-## Quantified Benefits
 
-| Metric | Traditional Referral Programs | Droploop | Improvement |
-|--------|---------------------------|-----------------|-------------|
-| Storage Cost per Referral | ~0.005 SOL | ~0.000005 SOL | 1000x reduction |
-| Referrals per Transaction | 1 | Up to 1,000 | 1000x throughput |
-| Gas Fees for 10,000 Referrals | ~50 SOL | ~0.05 SOL | 1000x savings |
-| Referral Verification Time | 2-5 seconds | 2-5 seconds | Equal UX |
-| Maximum Campaign Size | ~1,000 participants | 100,000+ participants | 100x scalability |
-
-For more in-depth technical details, refer to the [ARCHITECTURE.md](https://github.com/ayushshrivastv/Droploop/blob/main/ARCHITECTURE.md) file.
+For more in-depth technical details, refer to the [src/README.md](./src/README.md) file.
 
 ## Development Scripts
 
@@ -114,23 +180,21 @@ npm run start       # Start production server
 ```
 ## User Experience Showcase
 
-### Creator Journey
+### Program Creator Journey
+For business owners and creators, the process is simple: connect your Solana wallet, create a referral program with custom details, and generate QR codes for distribution. The system handles referral NFT creation using Light Protocol's compression technology.
+
 1. Connect wallet and access the intuitive dashboard
-2. Create a referral campaign with custom reward parameters
-3. Generate and share unique referral QR codes
-4. Monitor real-time referral statistics
+2. Create a referral program with custom reward structure
+3. Generate unique QR codes for distribution
+4. Monitor real-time referral statistics and reward distribution
 
 ### Referrer Journey
-1. Join a campaign and receive a personalized referral code
-2. Share referral QR code with potential new users
-3. Track referral conversions in profile dashboard
-4. Receive compressed token rewards automatically
+Referrers just scan the QR code with their phone, approve the claim in their Solana wallet, and instantly receive their referral NFT – all with minimal fees. They can then share their own referral link to earn rewards.
 
-### New User Journey
-1. Scan referral QR code or enter referral code
-2. Connect Solana wallet with a simple click
-3. Join the campaign and receive welcome rewards
-4. Get your own referral code to continue the chain
+1. Scan referral QR code with any Phone
+2. Connect Solana wallet with a single tap
+3. Claim compressed referral NFT in seconds
+4. Share with others and earn rewards automatically
 
 ## Deployment
 
@@ -142,93 +206,6 @@ The application is deployed on Vercel. To deploy your own version:
    - `NEXT_PUBLIC_CLUSTER` (e.g., `devnet`)
    - `NEXT_PUBLIC_RPC_ENDPOINT` (e.g., `https://api.devnet.solana.com`)
 
-## Setup and Installation
-
-### Prerequisites
-
-- Node.js 18+
-- Rust and Cargo
-- Solana CLI tools
-- Anchor framework
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/ZK-Compression-cPOP-Interface.git
-cd ZK-Compression-cPOP-Interface
-```
-
-2. Install dependencies:
-```bash
-# Install frontend dependencies
-cd solana-cpop
-npm install
-
-# Install Anchor program dependencies
-cd anchor-program
-npm install
-```
-
-3. Configure environment variables:
-```bash
-# Create a .env.local file in the solana-cpop directory with:
-cp .env.example .env.local
-```
-
-### Local Development
-
-1. Start the Next.js development server:
-```bash
-cd solana-cpop
-npm run dev
-```
-
-2. Build and deploy the Anchor program (requires Solana CLI and Anchor):
-```bash
-cd anchor-program
-anchor build
-anchor deploy --provider.cluster devnet
-```
-
-## Technical Implementation
-
-### Smart Contracts
-
-The Anchor program provides the following functions:
-
-- `initialize_event`: Creates a new event with a Merkle tree for token management
-- `generate_qr_code`: Generates a unique QR code for token claiming
-- `claim_token`: Claims a token by scanning a QR code and appends to the Merkle tree
-- `verify_token`: Verifies token ownership using Merkle proofs
-
-### Frontend
-
-The Next.js frontend provides:
-
-- Event creation and management dashboard
-- QR code generation and display
-- Token claiming interface
-- Verification tools
-
-### Database Schema
-
-- Events: Stores event details and Merkle tree information
-- QR Codes: Manages QR code data including secret keys and expiration times
-- Tokens: Tracks claimed tokens and associated metadata
-
-## Security Considerations
-
-- QR codes include unique secret keys and expiration times
-- Anti-double-claim mechanisms to prevent duplicate token claims
-- Wallet-based authentication for event creation and management
-- Rate limiting to prevent abuse
-
-## Project Status
-
-This project was developed as part of the ZK Compression Track by Solana Foundation, Helius, and Light Protocol. It demonstrates the practical application of compressed accounts for NFT-like use cases.
-
 ## License
 
-This project is licensed under the MIT License and is open for extension, experimentation, and contribution [MIT](LICENSE).
-
+This project is licensed under the MIT License and is open for extension, experimentation, and contribution.

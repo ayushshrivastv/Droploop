@@ -5,9 +5,8 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { formatPublicKey } from '@/lib/utils/solana';
-import { useSafeWallet } from '@/hooks/use-safe-wallet';
-import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { motion } from 'framer-motion';
+import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 
 // Dynamically import the WalletMultiButton to ensure it only loads client-side
 const WalletMultiButton = dynamic(
@@ -15,9 +14,9 @@ const WalletMultiButton = dynamic(
   { ssr: false }
 );
 
-// Modern wallet button style with improved visibility for light theme
+// Modern wallet button style with improved visibility
 const walletButtonStyle = {
-  backgroundColor: 'rgba(0, 0, 0, 0.85)',
+  backgroundColor: 'rgba(255, 255, 255, 0.12)',
   color: 'white',
   padding: '10px 18px',
   height: 'auto',
@@ -25,15 +24,16 @@ const walletButtonStyle = {
   fontSize: '14px',
   fontWeight: '500',
   whiteSpace: 'nowrap',
-  border: '1px solid rgba(0, 0, 0, 0.9)',
-  borderRadius: '0px', // Square corners for the article style
+  backdropFilter: 'blur(12px)',
+  border: '1px solid rgba(255, 255, 255, 0.15)',
+  borderRadius: '9999px', 
   transition: 'all 0.2s ease',
-  boxShadow: '0 3px 8px rgba(0, 0, 0, 0.15)',
+  boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
 };
 
 const walletButtonHoverStyle = {
-  backgroundColor: 'rgba(0, 0, 0, 0.7)',
-  border: '1px solid rgba(0, 0, 0, 0.8)',
+  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  border: '1px solid rgba(255, 255, 255, 0.25)',
   boxShadow: '0 3px 8px rgba(0, 0, 0, 0.15)',
 };
 
@@ -41,39 +41,30 @@ interface WalletConnectButtonProps {
   buttonVariant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
   buttonSize?: 'default' | 'sm' | 'lg' | 'icon';
   showAddress?: boolean;
-  className?: string;
 }
 
-// Inner component to handle wallet logic and rendering
-const WalletConnectButtonContent: FC<WalletConnectButtonProps> = ({
+export const WalletConnectButton: FC<WalletConnectButtonProps> = ({
   buttonVariant = 'default',
   buttonSize = 'default',
-  showAddress = true,
-  className = ''
+  showAddress = true
 }) => {
+  // Use client-side only rendering to prevent hydration errors
+  const [isMounted, setIsMounted] = useState(false);
   const [isWalletReady, setIsWalletReady] = useState(false);
-  const wallet = useSafeWallet();
-  const { publicKey, connected, connecting, disconnect, select, wallet: walletInstance, wallets } = wallet || {};
-  
-  // Only access modal on client side
-  const [isBrowser, setIsBrowser] = useState(false);
-  useEffect(() => {
-    setIsBrowser(typeof window !== 'undefined');
-  }, []);
-  
-  // Handle wallet modal safely
-  const modalContext = useWalletModal();
-  const setVisible = isBrowser ? modalContext?.setVisible : undefined;
+  const { publicKey, connected, connecting, disconnect, select, wallet, wallets } = useWallet();
+  const { setVisible } = useWalletModal();
   const [isHovered, setIsHovered] = useState(false);
   const walletCheckTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Ensure wallet adapter is fully initialized
   useEffect(() => {
+    setIsMounted(true);
+    
     // Staggered approach to wallet initialization
     walletCheckTimeout.current = setTimeout(() => {
       setIsWalletReady(true);
       console.debug('[WalletButton] Ready for interaction');
-    }, 1500); // Adjusted timeout for potentially quicker readiness
+    }, 1500);
     
     return () => {
       if (walletCheckTimeout.current) {
@@ -85,12 +76,11 @@ const WalletConnectButtonContent: FC<WalletConnectButtonProps> = ({
   // Attempt to force reconnect when wallet is available but not connected
   useEffect(() => {
     if (isWalletReady && !connected && !connecting && wallet) {
+      // Wait a moment before trying to reconnect
       const reconnectTimeout = setTimeout(() => {
         try {
           console.debug('[WalletButton] Attempting auto-reconnect');
-          if (walletInstance) {
-            select(walletInstance.adapter.name);
-          }
+          select(wallet.adapter.name);
         } catch (e) {
           console.debug('[WalletButton] Auto-reconnect failed:', e);
         }
@@ -100,116 +90,85 @@ const WalletConnectButtonContent: FC<WalletConnectButtonProps> = ({
     }
   }, [isWalletReady, connected, connecting, wallet, select]);
 
+  // Handle direct wallet connection
   const handleConnectClick = () => {
     if (!connected && !connecting) {
       setVisible(true); // Open the wallet modal
     }
   };
 
-  if (!isWalletReady) { // Use isWalletReady for the placeholder now
+  // During SSR or initial render, show a placeholder
+  if (!isMounted) {
     return (
-      <Button
-        variant={buttonVariant}
-        size={buttonSize}
-        className={`opacity-50 cursor-not-allowed ${className}`}
-        disabled
+      <motion.button 
+        className="wallet-adapter-button-trigger" 
+        initial={{ opacity: 0.7 }}
+        animate={{ opacity: 1 }}
+        style={{
+          ...walletButtonStyle,
+          width: '160px',
+        }}
       >
-        Loading Wallet...
-      </Button>
+        Connect Wallet
+      </motion.button>
     );
   }
 
-  if (!wallet || !wallets || wallets.length === 0) {
+  // When wallet is ready but not connected
+  if (isWalletReady && !connected) {
     return (
-      <Button
-        variant={buttonVariant}
-        size={buttonSize}
-        className={className}
-        onClick={handleConnectClick}
-      >
-        Install Solana Wallet
-      </Button>
-    );
-  }
-
-  if (!connected) {
-    return (
-      <Button
-        variant={buttonVariant}
-        size={buttonSize}
-        className={className}
-        onClick={handleConnectClick}
-        disabled={connecting}
-        style={walletButtonStyle} // Apply modern style
+      <motion.div
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.98 }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {connecting ? 'Connecting...' : 'Connect Wallet'}
-      </Button>
-    );
-  }
-
-  if (publicKey) {
-    return (
-      <motion.div 
-        className={`relative ${className}`}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <Button
-          variant={buttonVariant}
-          size={buttonSize}
-          style={isHovered ? {...walletButtonStyle, ...walletButtonHoverStyle} : walletButtonStyle}
-        >
-          {showAddress ? formatPublicKey(publicKey.toBase58()) : 'Wallet Connected'}
-        </Button>
-        {isHovered && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            transition={{ duration: 0.2 }}
-            className="absolute top-full mt-2 right-0 z-10"
+        {connecting ? (
+          <Button
+            className="wallet-adapter-button-loading"
+            style={{
+              ...walletButtonStyle,
+              cursor: 'progress',
+              opacity: 0.8,
+            }}
+            disabled
           >
-            <Button
-              onClick={() => disconnect().catch(e => console.error('Disconnect failed', e))}
-              className="bg-red-600 hover:bg-red-700 text-white w-full rounded-none"
-            >
-              Disconnect
-            </Button>
-          </motion.div>
+            Connecting...
+          </Button>
+        ) : (
+          <WalletMultiButton 
+            className="wallet-adapter-button-trigger" 
+            style={isHovered ? { ...walletButtonStyle, ...walletButtonHoverStyle } : walletButtonStyle} 
+            onClick={handleConnectClick}
+          />
         )}
       </motion.div>
     );
   }
 
-  // Fallback: Default wallet adapter button if something is unexpected
-  // This can be useful for debugging or if the custom UI has issues.
-  console.warn('[WalletButton] Fallback: Rendering WalletMultiButton');
-  return <WalletMultiButton style={{...walletButtonStyle, borderRadius: '0px'}} className={className} />;
-};
-
-export const WalletConnectButton: FC<WalletConnectButtonProps> = (props) => {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  if (!isMounted) {
-    // Render a simple placeholder during SSR and initial client render
-    return (
-      <Button
-        variant={props.buttonVariant || 'default'}
-        size={props.buttonSize || 'default'}
-        className={`opacity-50 cursor-not-allowed ${props.className}`}
-        disabled
+  // When connected, show address and the wallet button
+  return (
+    <div className="flex items-center gap-2">
+      {showAddress && publicKey && (
+        <motion.span 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-sm font-medium text-zinc-200"
+        >
+          {formatPublicKey(publicKey)}
+        </motion.span>
+      )}
+      <motion.div
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.98 }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
-        Loading Wallet...
-      </Button>
-    );
-  }
-
-  // Once mounted, render the actual button content which uses wallet hooks
-  return <WalletConnectButtonContent {...props} />;
+        <WalletMultiButton 
+          className="wallet-adapter-button-trigger" 
+          style={isHovered ? { ...walletButtonStyle, ...walletButtonHoverStyle } : walletButtonStyle} 
+        />
+      </motion.div>
+    </div>
+  );
 };

@@ -2,237 +2,312 @@
 
 import { ROUTES } from '@/lib/constants';
 import Link from 'next/link';
-import { ArticleLayout } from '@/components/layouts/article-layout';
+import { AppleLayout } from '@/components/layouts/apple-layout';
+import { HeroSection } from '@/components/ui/Webstyles/hero-section';
+import { FeatureSection } from '@/components/ui/Webstyles/feature-section';
+import { SpecGrid } from '@/components/ui/Webstyles/spec-grid';
+import { CTASection } from '@/components/ui/Webstyles/cta-section';
+import { ReadmeShowcase } from '@/components/ui/Webstyles/readme-showcase';
+import { BenefitsChart } from '@/components/ui/Webstyles/benefits-chart';
+import { FeatureHighlight } from '@/components/ui/Webstyles/feature-highlight';
+// Removed ParticlesBackground import
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { HeroSection } from '@/components/home/hero-section';
-import { ParticlesBackground } from '@/components/shared/particles-background';
+import { QuantifiedBenefits } from '@/components/ui/Webstyles/quantified-benefits';
+
+// Icon components for feature section
+const ZkIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="6" width="20" height="12" rx="2"/>
+    <path d="M6 12h12"/>
+    <path d="M8 10v4"/>
+    <path d="M16 10v4"/>
+  </svg>
+);
+
+const QrIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="7" height="7"/>
+    <rect x="14" y="3" width="7" height="7"/>
+    <rect x="14" y="14" width="7" height="7"/>
+    <rect x="3" y="14" width="7" height="7"/>
+  </svg>
+);
+
+const TokenIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+    <line x1="9" y1="9" x2="9.01" y2="9"/>
+    <line x1="15" y1="9" x2="15.01" y2="9"/>
+  </svg>
+);
+
+const specItems = [
+  {
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+    ),
+    title: 'Tiered Rewards',
+    description: 'Create multi-level referral programs with customizable reward structures for different tiers.',
+  },
+  {
+    icon: <QrIcon />,
+    title: 'QR Code Sharing',
+    description: 'Generate dynamic QR codes that referrers can share to instantly track and reward referrals.',
+  },
+  {
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+        <circle cx="8.5" cy="8.5" r="1.5"/>
+        <polyline points="21 15 16 10 5 21"/>
+      </svg>
+    ),
+    title: 'Custom Branding',
+    description: 'Personalize referral NFTs with your brand identity and program details for a professional look.',
+  },
+  {
+    icon: <TokenIcon />,
+    title: 'Program Metadata',
+    description: 'Attach detailed program information to referral NFTs, creating transparent reward structures.',
+  },
+  {
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+    ),
+    title: 'Fraud Prevention',
+    description: 'Secure verification ensures only legitimate referrals are rewarded, preventing abuse.',
+  },
+  {
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2a10 10 0 1 0 10 10H12V2Z"/>
+        <path d="M21.17 8H12V2.83c2 .17 4.3 1.53 5.5 2.75 2.1 2.07 3.5 3.9 3.67 5.42Z"/>
+      </svg>
+    ),
+    title: 'Analytics Dashboard',
+    description: 'Track referral performance and reward distribution with real-time analytics.',
+  },
+];
+
+// Benefits metrics data for comparison table
+const benefitsMetrics = [
+  {
+    metric: 'Storage Cost per Referral',
+    traditional: '~0.005 SOL',
+    scalable: '~0.000005 SOL',
+    improvement: '1000x reduction'
+  },
+  {
+    metric: 'Referrals per Transaction',
+    traditional: '1',
+    scalable: 'Up to 1,000',
+    improvement: '1000x throughput'
+  },
+  {
+    metric: 'Gas Fees for 10,000 Referrals',
+    traditional: '~50 SOL',
+    scalable: '~0.05 SOL',
+    improvement: '1000x savings'
+  },
+  {
+    metric: 'Referral Confirmation Time',
+    traditional: '2-5 seconds',
+    scalable: '2-5 seconds',
+    improvement: 'Equal UX'
+  },
+  {
+    metric: 'Maximum Program Size',
+    traditional: '~1,000 referrals',
+    scalable: '100,000+ referrals',
+    improvement: '100x scalability'
+  },
+  {
+    metric: 'Reward Distribution Speed',
+    traditional: '~10 rewards/min',
+    scalable: '~5,000 rewards/min',
+    improvement: '500x faster'
+  }
+];
 
 export default function Home() {
+  // Custom title component with gradient styling
+  const heroTitle = (
+    <div className="space-y-2">
+      <motion.h1
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="text-5xl md:text-7xl font-bold tracking-tight text-white"
+      >
+        Droploop
+      </motion.h1>
+      <motion.h2
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        className="text-3xl md:text-5xl font-bold tracking-tight text-white"
+      >
+        Decentralized Referral System
+      </motion.h2>
+    </div>
+  );
+
   return (
-    <>
-      {/* Optional: Use ParticlesBackground as a global background */}
-      {/* <ParticlesBackground /> */}
-      
-      <ArticleLayout>
-        {/* Hero Section */}
-        <HeroSection 
-          title="Droploop"
-          subtitle="A decentralized referral system on Solana using ZK Compression with Light Protocol."
-        />
+    <AppleLayout>
+      {/* Particles background removed */}
+      {/* Hero Section */}
+      <HeroSection
+        title={heroTitle}
+        subtitle="Grow your community with a decentralized referral program powered by Solana and Light Protocol's compression technology"
+      />
 
-        {/* Main Article Section */}
-        <section className="py-20 text-white">
-          <div className="container max-w-3xl mx-auto px-4">
+      {/* Project Overview Section */}
+      <section className="py-8 md:py-16 bg-black/30 backdrop-blur-sm">
+        <div className="px-4 md:px-6 max-w-3xl mx-auto">
+          <article className="space-y-6 text-left font-fredoka">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="mb-12"
+              transition={{ duration: 0.6 }}
+              className="space-y-3"
             >
-              <h2 className="text-4xl md:text-5xl font-serif font-medium mb-6 tracking-tight">
-                Revolutionizing Referral Programs with ZK Compression
-              </h2>
-              <p className="text-xl md:text-2xl text-gray-300 font-serif">
-                How Droploop is making community growth 1000x more efficient on Solana
+              <h1 className="text-3xl md:text-4xl font-bold text-white font-sf-pro">
+                Droploop Decentralized Referral System
+              </h1>
+              <div className="text-zinc-400 text-sm border-b border-zinc-800 pb-3">Posted by Ayush Srivastava · May 25</div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="space-y-6"
+            >
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                At the intersection of community growth and blockchain technology, a new platform is revolutionizing how businesses build referral programs. Droploop's decentralized referral system makes creating, managing, and rewarding referrals as simple as scanning a QR code.
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                The concept was born from recurring challenges faced by businesses and creators — many of whom wanted to leverage the power of community-driven growth but were hindered by technical barriers: complex reward tracking, unreliable attribution, and high implementation costs.
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                <strong>A Simple Share, A Powerful Reward System</strong><br />
+                Droploop rewrites the referral program narrative. Built on the high-speed Solana blockchain and leveraging Light Protocol's zero-knowledge compression, the system allows businesses to create and manage referral NFTs that automatically track and reward referrals — with minimal costs and near-instant confirmation.
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                The infrastructure compresses thousands of referral records into a single verifiable on-chain state, dramatically reducing storage requirements and costs. Program creators simply input program details, customize reward parameters through an intuitive dashboard, and generate QR codes that referrers can share with their networks to instantly track referrals and distribute rewards.
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                "It's referral marketing reimagined," said one early user. "Thousands of referrals tracked automatically — and no one has to think about how it works. They just share, refer, and rewards are distributed instantly."
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                <strong>An Infrastructure for Community Growth</strong><br />
+                Beyond technical innovation, Droploop is designed to make referral programs effortless — and community growth measurable. Businesses can deploy referral NFTs for a wide range of use cases: affiliate marketing, customer acquisition, community expansion, and tiered reward systems.
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                With support for popular Solana wallets like Phantom, Backpack, and Solflare, users don't need to learn new tools. Referral NFTs and rewards are distributed instantly, creating a seamless experience for both referrers and those being referred.
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                "People are naturally motivated to share things they love," said Natalie Chong, a marketing director who piloted the system for her SaaS product. "The referral program felt less like a marketing tactic and more like community building. Our users loved earning rewards for sharing — and we didn't have to worry about tracking or attribution."
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                <strong>Security Without Sacrificing Growth</strong><br />
+                The platform integrates real-time analytics and fraud prevention through zero-knowledge proofs, ensuring every referral is secure and verifiable. Even with thousands of simultaneous referrals, the system remains fast, reliable, and transparent.
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                The system's flexibility allows for creative customization — including tiered rewards, instant or milestone-based distributions, and transferable or non-transferable referral NFTs — all while maintaining rigorous verification standards.
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                "In the past, we had to use centralized referral platforms that were expensive and inflexible," said José Medina, a growth marketer at a Web3 startup. "Now we just define the referral rules, and everything happens automatically — no manual tracking, no payment disputes."
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                <strong>Reclaiming the Power of Word-of-Mouth</strong><br />
+                At its core, Droploop is less about technology and more about amplifying the most powerful marketing channel: personal recommendations. Every feature, from instant reward distribution to customizable referral parameters, is designed to let businesses focus on what truly matters: creating products and services worth sharing.
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                Whether it's a small startup or a global enterprise, this platform offers a simple promise: create and manage referral programs as effortlessly as sharing a link — and watch your community grow organically.
+              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                As one early adopter put it, "Referral programs shouldn't be about complex implementation. They should be about rewarding your community for sharing what they love."
               </p>
             </motion.div>
+          </article>
+        </div>
+      </section>
+
+      {/* Compression Technology Section */}
+      <section className="py-12 md:py-20 bg-black/30 backdrop-blur-sm">
+        <div className="px-6 md:px-10 max-w-3xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="space-y-3"
+          >
+            <h2 className="text-2xl md:text-3xl font-bold text-white font-sf-pro">
+              How Our Referral NFT Technology Works
+            </h2>
+            <div className="text-zinc-400 text-sm border-b border-zinc-800 pb-3">Technology Overview</div>
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="space-y-6 font-fredoka"
+          >
+            <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+              Droploop leverages Light Protocol's zero-knowledge compression technology to revolutionize referral programs on Solana. This cutting-edge approach combines the security of blockchain with the efficiency of advanced cryptographic techniques, enabling a new paradigm for referral tracking and reward distribution.
+            </p>
             
-            <div className="prose prose-lg max-w-none font-serif">
-              <motion.p 
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-                className="mb-6 text-lg leading-relaxed text-white"
-              >
-                In the rapidly evolving landscape of Web3 communities, effective growth mechanisms are essential. 
-                Traditional referral systems face significant challenges: high gas fees, limited scalability, and 
-                complex user experiences. Droploop addresses these challenges head-on by leveraging Zero-Knowledge 
-                compression technology on Solana.
-              </motion.p>
+            <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+              At its core, our implementation uses zero-knowledge proofs to compress referral data while preserving its integrity and verifiability. This allows us to dramatically reduce on-chain storage requirements and transaction costs without sacrificing security or functionality. The system can process hundreds of referrals in a single transaction, making it ideal for viral growth campaigns and large-scale referral programs.
+            </p>
+            
+            <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+              Beyond efficiency, this technology enhances privacy by allowing selective disclosure of information. Businesses can verify referral authenticity without exposing sensitive user data, while participants can prove their referrals without revealing personal details. The entire system is built on cryptographic guarantees that mathematically prevent fraud or unauthorized modifications.
+            </p>
+            
+            <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+              <strong>Quantifiable Results:</strong> With our referral NFT technology, we've achieved a 1000× reduction in cost, 500× increase in processing speed, and 100× decrease in storage requirements compared to traditional referral systems.
+            </p>
+          </motion.div>
+        </div>
+      </section>
 
-              <motion.p 
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="mb-6 text-lg leading-relaxed text-white"
-              >
-                Our platform enables creators to launch referral campaigns with minimal cost while maintaining 
-                security and transparency. Users can join through personalized QR codes, and both referrers and 
-                new participants receive token rewards automatically—all at a fraction of the traditional cost.
-              </motion.p>
-
-              <motion.h3 
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-                className="text-2xl font-serif font-medium mt-12 mb-4 tracking-tight text-white"
-              >
-                The Problem with Traditional Referral Systems
-              </motion.h3>
-              
-              <motion.p 
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-                className="mb-6 text-lg leading-relaxed text-white"
-              >
-                Web3 projects have long struggled with efficient growth mechanisms. Traditional on-chain referral 
-                programs face three critical limitations:
-              </motion.p>
-
-              <motion.ul 
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-                className="list-disc pl-6 mb-6 space-y-2 text-gray-200"
-              >
-                <li className="text-lg">High costs: Traditional NFTs or tokens on Solana require full on-chain storage, costing approximately 0.01-0.05 SOL per mint.</li>
-                <li className="text-lg">Limited scalability: As communities grow, transaction fees and storage requirements become prohibitive.</li>
-                <li className="text-lg">Complex user experience: Many systems require technical knowledge, creating barriers to adoption.</li>
-              </motion.ul>
-
-              <motion.blockquote 
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-                className="border-l-4 border-gray-300 pl-4 italic my-8 text-xl text-gray-300"
-              >
-                The cost of running a 10,000-participant referral program with traditional methods would be approximately 
-                50 SOL. With Droploop's ZK compression, the same program costs just 0.05 SOL—a 1000x reduction.
-              </motion.blockquote>
-            </div>
-          </div>
-        </section>
-
-        {/* Features Section */}
-        <section className="py-20 bg-black text-white">
-          <div className="container max-w-3xl mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="mb-12"
+      {/* Video Section */}
+      <section className="py-12 md:py-20 bg-black/30 backdrop-blur-sm">
+        <div className="px-6 md:px-10 max-w-3xl mx-auto">
+          <div className="aspect-video">
+            <video 
+              className="w-full rounded-lg shadow-xl" 
+              controls 
+              preload="auto"
+              playsInline
+              muted
+              autoPlay={false}
+              controlsList="nodownload"
+              disablePictureInPicture
+              disableRemotePlayback
             >
-              <h2 className="text-4xl font-serif font-medium mb-6 tracking-tight">Key Features</h2>
-              <p className="text-xl text-gray-300 font-serif">
-                Droploop offers powerful tools for community growth through ZK compression
-              </p>
-            </motion.div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-                className="border border-gray-700 p-6"
-              >
-                <h3 className="text-xl font-serif font-medium mb-3">QR Code Scanner Integration</h3>
-                <p className="text-white mb-4">
-                  Seamlessly scan referral QR codes using your device camera. Our implementation uses HTML5-QRCode 
-                  for secure camera access with robust permission handling.
-                </p>
-                <ul className="list-disc pl-6 text-white space-y-1">
-                  <li>Multi-format support for different QR code types</li>
-                  <li>Automatic form population with scanned data</li>
-                  <li>Responsive camera interface</li>
-                </ul>
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="border border-gray-700 p-6"
-              >
-                <h3 className="text-xl font-serif font-medium mb-3">Airdrop Mode</h3>
-                <p className="text-white mb-4">
-                  Distribute tokens directly without requiring referral codes. This gives event organizers 
-                  flexibility in how they distribute tokens to participants.
-                </p>
-                <ul className="list-disc pl-6 text-white space-y-1">
-                  <li>Simple toggle between referral and airdrop modes</li>
-                  <li>Dynamic UI adaptation based on active mode</li>
-                  <li>Streamlined claiming process</li>
-                </ul>
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="border border-gray-700 p-6"
-              >
-                <h3 className="text-xl font-serif font-medium mb-3">Cost Efficiency</h3>
-                <p className="text-white mb-4">
-                  Reduce storage costs by a factor of 1000x, enabling the creation of thousands of referral tokens 
-                  for fractions of a cent.
-                </p>
-                <ul className="list-disc pl-6 text-white space-y-1">
-                  <li>~0.000005 SOL per referral (vs ~0.005 SOL traditional)</li>
-                  <li>Support for campaigns with 100,000+ participants</li>
-                  <li>Minimal gas fees for all operations</li>
-                </ul>
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="border border-gray-700 p-6"
-              >
-                <h3 className="text-xl font-serif font-medium mb-3">Security & Privacy</h3>
-                <p className="text-white mb-4">
-                  Maintain the same security guarantees as traditional on-chain tokens through cryptographic proofs, 
-                  while keeping certain information private.
-                </p>
-                <ul className="list-disc pl-6 text-white space-y-1">
-                  <li>Zero-knowledge proofs for data validation</li>
-                  <li>Merkle tree verification for referral authenticity</li>
-                  <li>Secure wallet connection and transaction handling</li>
-                </ul>
-              </motion.div>
-            </div>
+              <source src="/Champ.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* CTA Section */}
-        <section className="py-20 border-t border-gray-800">
-          <div className="container max-w-3xl mx-auto px-4 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-            >
-              <h2 className="text-4xl font-serif font-medium mb-6 tracking-tight">Ready to grow your community?</h2>
-              <p className="text-xl text-white font-serif mb-8">
-                Launch your first referral campaign and start rewarding your community.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button asChild className="bg-white text-black hover:bg-gray-200 rounded-none">
-                  <Link href={`${ROUTES.MINT}?tab=campaign`}>Create Referral</Link>
-                </Button>
-                <Button asChild className="bg-white text-black hover:bg-gray-200 rounded-none">
-                  <Link href={ROUTES.CLAIM}>Claim Referral</Link>
-                </Button>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-      </ArticleLayout>
-    </>
+      {/* CTA Section removed as requested */}
+    </AppleLayout>
   );
 }

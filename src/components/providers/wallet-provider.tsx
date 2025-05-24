@@ -1,13 +1,16 @@
 "use client";
 
 import { type FC, type ReactNode, useMemo, useState, useEffect } from 'react';
-import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
+import {
+  ConnectionProviderWrapper as ConnectionProvider,
+  WalletProviderWrapper as WalletProvider,
+  WalletModalProviderWrapper as WalletModalProvider
+} from '@/components/providers/wallet-adapter-wrapper';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import {
   PhantomWalletAdapter,
   SolflareWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
-import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { type Cluster, DEVNET_RPC_ENDPOINT, MAINNET_RPC_ENDPOINT } from '@/lib/constants';
 
 // Import wallet adapter styles
@@ -45,11 +48,11 @@ export const SolanaWalletProvider: FC<SolanaWalletProviderProps> = ({
       : DEVNET_RPC_ENDPOINT;
   }, [cluster, endpoint]);
 
-  // Set up supported wallets
+  // Set up supported wallets with network parameter
   const wallets = useMemo(() => [
-    new PhantomWalletAdapter(),
-    new SolflareWalletAdapter(),
-  ], []);
+    new PhantomWalletAdapter({ network }),
+    new SolflareWalletAdapter({ network }),
+  ], [network]);
 
   // State to determine if the component has been mounted client-side
   const [mounted, setMounted] = useState(false);
@@ -61,11 +64,24 @@ export const SolanaWalletProvider: FC<SolanaWalletProviderProps> = ({
     return () => setMounted(false);
   }, []);
 
+  // Handle wallet errors
+  const onError = (error: Error) => {
+    console.error('Wallet error:', error);
+    // More user-friendly error messages
+    if (error.message.includes('Origin not approved')) {
+      console.log('Please approve this app in your wallet extension');
+    }
+  };
+
   return (
     <ConnectionProvider endpoint={rpcEndpoint}>
-      <WalletProvider wallets={wallets} autoConnect={mounted}>
+      <WalletProvider 
+        wallets={wallets} 
+        autoConnect={false} // Disable autoConnect to prevent Origin not approved errors
+        onError={onError}
+      >
         <WalletModalProvider>
-          {children}
+          {mounted ? children : null}
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>

@@ -1,5 +1,5 @@
-export const APP_NAME = "Droploop: Decentralized Referral System";
-export const APP_DESCRIPTION = "A decentralized referral system on Solana using ZK Compression with Light Protocol for community growth";
+export const APP_NAME = "Droploop Issuance via Solana Pay";
+export const APP_DESCRIPTION = "Demonstrating Droploop compressed token issuance and distribution on Solana using Solana Pay.";
 
 // RPC endpoints - Replace with your actual endpoints when deploying
 export const DEVNET_RPC_ENDPOINT = "https://api.devnet.solana.com";
@@ -17,16 +17,20 @@ export const DEFAULT_TOKEN_DECIMALS = 9;
 
 // Token metadata defaults
 export const DEFAULT_METADATA = {
-  name: "Droploop Referral Token",
-  symbol: "DROP",
-  description: "This token rewards you for participating in the Droploop referral program",
-  image: "https://example.com/droploop-token.png",
+  name: "Proof of Participation Token",
+  symbol: "POP",
+  description: "This token verifies your attendance at an event",
+  image: "https://example.com/placeholder.png",
 };
 
 // Routes
 export const ROUTES = {
   HOME: "/",
+  DASHBOARD: "/dashboard",
   MINT: "/mint",
   CLAIM: "/claim",
   PROFILE: "/profile",
+  ADMIN: "/admin",
+  CREATE_TOKEN: "/mint",
+  DOCUMENTATION: "/docs",
 };
