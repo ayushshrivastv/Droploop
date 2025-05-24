@@ -61,7 +61,8 @@ The user interface is built to be intuitive across devices and accommodates both
 
 <img src="https://github.com/user-attachments/assets/8fe8ead1-4c91-46c9-baaa-14aab625c1c3" width="800">
 
-<img src="https://github.com/user-attachments/assets/8fe8ead1-4c91-46c9-baaa-14aab625c1c3" style="width: 800px;">
+<img src="https://github.com/user-attachments/assets/add0f1bb-c741-4131-aaf9-a76c5054d7bd" width="800" alt="Screenshot 2025-05-25 at 3:35:59 AM">
+
 
 
 ### Seamless Connection of Wallet to Collect Event Tokens.
