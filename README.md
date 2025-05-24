@@ -13,9 +13,10 @@ Droploop's decentralized referral system combines the power of blockchain techno
 
 
 ### Web Page Link
-**[Droploop Page](https://scalable-c-token-ayushshrivastvs-projects.vercel.app/)**
+**[Droploop Page](https://droploop-ten.vercel.app)**
 
-![Screenshot 2025-05-11 at 3 10 50 AM](https://github.com/user-attachments/assets/f3607a9c-9026-46d0-8559-f83740a2eab7)
+![Screenshot 2025-05-25 at 3 34 49 AM](https://github.com/user-attachments/assets/91b4fc85-951f-4927-822a-a325da9b0a3f)
+
 
 ## Overview
 
@@ -58,15 +59,15 @@ Business owners and creators can log in with their Solana wallet, create a new r
 
 The user interface is built to be intuitive across devices and accommodates both the program creator and referrer journeys—from creating programs to claiming rewards—with minimal friction.
 
-<img src="https://github.com/user-attachments/assets/f7a7ba25-3150-4b68-a109-b3f85af91110" alt="442056085-235a9be9-e4fa-46f9-989e-1b1ce8cda931" width="800"/>
+<img src="https://github.com/user-attachments/assets/8fe8ead1-4c91-46c9-baaa-14aab625c1c3" width="600">
 
-<img src="https://github.com/user-attachments/assets/e2d11e13-a8b1-4c6c-a7ad-2a3d65d02f86" alt="442056067-8b7532fd-1a86-4471-810d-b7e9b3484217" width="800"/>
+<img src="https://github.com/user-attachments/assets/8fe8ead1-4c91-46c9-baaa-14aab625c1c3" style="width: 600px;">
 
-<img src="https://github.com/user-attachments/assets/f9c81e73-129b-4750-9d6d-9a44a9d8d104" alt="Screenshot 2025-05-12 at 4 23 55 AM" width="800"/>
 
 ### Seamless Connection of Wallet to Collect Event Tokens.
+<img src="https://github.com/user-attachments/assets/f0b7ff0c-ba67-4a91-aaf8-337878154d63" style="width: 300px;">
 
-<img src="https://github.com/user-attachments/assets/397b8b3b-b404-4b81-8b32-a6f6885f04cb" alt="Screenshot 2025-05-12 at 7 16 48 AM" width="300"/>
+
 
 
 <img src="https://github.com/user-attachments/assets/5ecbbd21-bd21-4201-bb57-2dbc219473d1" alt="Screenshot 2025-05-18 at 12 35 43 AM" width="300"/>
