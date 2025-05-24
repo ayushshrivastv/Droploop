@@ -10,9 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { createSolanaPayClaimUrl } from '@/lib/utils/qrcode';
-import QRCode from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ClaimForm } from '@/components/claim/new-claim-form';
+import { ClaimForm } from '@/components/claim/referral-claim-form';
 
 export default function IntegrationTestPage() {
   const { publicKey, connected } = useWallet();
@@ -108,7 +108,7 @@ export default function IntegrationTestPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Tabs defaultValue="setup" value={currentStage} onValueChange={(value) => setCurrentStage(value as any)}>
+                <Tabs defaultValue="setup" value={currentStage} onValueChange={(value) => setCurrentStage(value as 'setup' | 'mint' | 'claim')}>
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="setup">Setup</TabsTrigger>
                     <TabsTrigger value="mint" disabled={!testMintAddress}>Mint</TabsTrigger>
@@ -187,7 +187,7 @@ export default function IntegrationTestPage() {
                     {solanaPayQrVisible && solanaPayUrl && (
                       <div className="flex justify-center p-4">
                         <div className="bg-white p-3 rounded-md">
-                          <QRCode value={solanaPayUrl} size={200} />
+                          <QRCodeSVG value={solanaPayUrl} size={200} />
                         </div>
                       </div>
                     )}

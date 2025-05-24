@@ -1,22 +1,22 @@
 "use client";
 
+import React, { useState, useEffect, useCallback } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 
 /**
- * TokenStatistics component - styled to match the application design theme
- * Displays statistics about tokens minted by the user
+ * ReferralStatistics component - styled to match the application design theme
+ * Displays statistics about referral programs created by the user
  */
-export function TokenStatistics() {
+export function ReferralStatistics() {
   // Always call hooks unconditionally - this is required by React's Rules of Hooks
   const wallet = useWallet();
   const [isClient, setIsClient] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [stats, setStats] = useState<{
-    totalTokensMinted: number;
-    tokensDistributed: number;
-    activeEvents: number;
+    totalProgramsCreated: number;
+    referralsProcessed: number;
+    activePrograms: number;
   } | null>(null);
   
   // Mark when component is client-side rendered
@@ -28,8 +28,8 @@ export function TokenStatistics() {
   const publicKey = isClient ? wallet.publicKey : null;
   const connected = isClient ? wallet.connected : false;
 
-  // Function to fetch token statistics
-  const fetchTokenStats = async () => {
+  // Function to fetch referral program statistics wrapped in useCallback
+  const fetchReferralStats = useCallback(async () => {
     if (!connected || !publicKey) return;
     
     setIsLoading(true);
@@ -40,25 +40,25 @@ export function TokenStatistics() {
       
       // Mock data - would be replaced with actual API response
       setStats({
-        totalTokensMinted: 1500,
-        tokensDistributed: 750,
-        activeEvents: 3
+        totalProgramsCreated: 15,
+        referralsProcessed: 750,
+        activePrograms: 3
       });
     } catch (error) {
-      console.error("Error fetching token stats:", error);
+      console.error("Error fetching referral stats:", error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [connected, publicKey]);
 
   // Fetch stats when wallet connects
   useEffect(() => {
     if (connected && publicKey) {
-      fetchTokenStats();
+      fetchReferralStats();
     } else {
       setStats(null);
     }
-  }, [connected, publicKey]);
+  }, [connected, publicKey, fetchReferralStats]);
 
   return (
     <div className="border border-border rounded-lg p-6 mt-8 bg-black">
@@ -66,11 +66,11 @@ export function TokenStatistics() {
       
       <div className="bg-[#121212] rounded-lg border border-dashed border-gray-800 overflow-hidden">
         {!connected ? (
-          <div className="p-8 flex items-center justify-center min-h-[160px]" data-component-name="TokenStatistics">
+          <div className="p-8 flex items-center justify-center min-h-[160px]" data-component-name="ReferralStatistics">
             <p className="text-gray-400 text-center">Connect your wallet to view your referral statistics</p>
           </div>
         ) : (
-          <div className="p-8 flex items-center justify-center min-h-[160px]" data-component-name="TokenStatistics">
+          <div className="p-8 flex items-center justify-center min-h-[160px]" data-component-name="ReferralStatistics">
             <p className="text-gray-400 text-center font-medium text-xl">Coming Soon...</p>
           </div>
         )}

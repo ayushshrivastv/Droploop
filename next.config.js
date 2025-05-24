@@ -1,6 +1,11 @@
 /** @type {import('next').NextConfig} */
 // Trigger new Vercel deployment - Updated on May 9, 2025
 const nextConfig = {
+  // Expose environment variables to the browser
+  env: {
+    NEXT_PUBLIC_ADMIN_PRIVATE_KEY: process.env.ADMIN_PRIVATE_KEY,
+    NEXT_PUBLIC_SENDER_PRIVATE_KEY: process.env.NEXT_PUBLIC_SENDER_PRIVATE_KEY,
+  },
   images: {
     unoptimized: true,
     domains: [

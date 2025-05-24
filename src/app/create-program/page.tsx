@@ -5,7 +5,7 @@ import { ROUTES } from '@/lib/constants';
 import { MintForm } from '@/components/mint/referral-program-form';
 import { ReferralStatistics } from '@/components/mint/referral-statistics';
 
-export default function MintPage() {
+export default function CreateProgramPage() {
   return (
     <AppleLayout>
       {/* Content */}

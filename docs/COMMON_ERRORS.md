@@ -1,16 +1,16 @@
-# Common Token Creation Errors
+# Common Referral Program Creation Errors
 
-This document describes common errors you might encounter when creating tokens and how to fix them.
+This document describes common errors you might encounter when creating referral programs and how to fix them.
 
 ## Insufficient Admin Wallet Funds
 
 **Error Message:**
 ```
-Insufficient admin wallet balance: The admin wallet needs at least 2 SOL to create tokens.
+Insufficient admin wallet balance: The admin wallet needs at least 2 SOL to create referral tokens.
 ```
 
 **Cause:**
-The server-side admin wallet used for token creation doesn't have enough SOL to pay for transaction fees.
+The server-side admin wallet used for referral program creation doesn't have enough SOL to pay for transaction fees.
 
 **Solution:**
 1. Fund the admin wallet with SOL:
@@ -23,7 +23,7 @@ The server-side admin wallet used for token creation doesn't have enough SOL to 
    - [SolFaucet](https://solfaucet.com)
    - [QuickNode Faucet](https://faucet.quicknode.com/solana/devnet)
 
-3. The admin wallet needs at least 2-3 SOL for reliable token creation.
+3. The admin wallet needs at least 2-3 SOL for reliable referral program creation.
 
 ## Insufficient Funds for Rent
 
@@ -33,7 +33,7 @@ Transaction simulation failed: Transaction results in an account with insufficie
 ```
 
 **Cause:**
-The admin wallet doesn't have enough SOL to cover the storage cost ("rent") for creating the new token mint account.
+The admin wallet doesn't have enough SOL to cover the storage cost ("rent") for creating the new referral token mint account.
 
 **Solution:**
 1. Fund the admin wallet with at least 3 SOL
@@ -72,7 +72,7 @@ failed to get slot: Method not found
 ```
 
 **Cause:**
-The RPC endpoint doesn't support all the methods required by Light Protocol.
+The RPC endpoint doesn't support all the methods required by Light Protocol for compressed referral tokens.
 
 **Solution:**
 1. Update to a compatible RPC endpoint:
@@ -83,9 +83,9 @@ The RPC endpoint doesn't support all the methods required by Light Protocol.
    ```bash
    node scripts/test-token-creation.js
    ```
-3. The fix has already been implemented to use Helius RPC endpoint with better Light Protocol support
+3. The fix has already been implemented to use standard Solana RPC endpoints with fallback to non-compressed tokens when Light Protocol methods are unavailable
 
-## Invalid Metadata URI
+## Invalid Referral Program Metadata
 
 **Error Message:**
 ```
@@ -93,7 +93,7 @@ Transaction simulation failed: Error processing Instruction 3
 ```
 
 **Cause:**
-The metadata URI is invalid or not properly formatted.
+The referral program metadata URI is invalid or not properly formatted.
 
 **Solution:**
 1. Use a known-good Arweave JSON metadata URI:

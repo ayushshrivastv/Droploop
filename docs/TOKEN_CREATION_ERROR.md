@@ -1,8 +1,8 @@
-# Token Creation Error Documentation
+# Referral Program Creation Error Documentation
 
 ## Error Message
 ```
-Token creation failed: This may be due to an invalid admin keypair or insufficient funds. Please check your environment variables and wallet balance.
+Referral program creation failed: This may be due to an invalid admin keypair or insufficient funds. Please check your environment variables and wallet balance.
 ```
 
 ## Console Error
@@ -13,11 +13,11 @@ src/components/mint/mint-form.tsx (189:17) @ onSubmit
 
   187 |         // Check if the request was successful
   188 |         if (!response.ok) {
-> 189 |           throw new Error(result.details || result.error || 'Token creation failed');
+> 189 |           throw new Error(result.details || result.error || 'Referral program creation failed');
       |                 ^
   190 |         }
   191 |         
-  192 |         console.log("Server-side token creation successful:", result);
+  192 |         console.log("Server-side referral program creation successful:", result);
 ```
 
 ## Root Cause

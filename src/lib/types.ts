@@ -1,16 +1,16 @@
 import type { Cluster } from './constants';
 import type { PublicKey } from '@solana/web3.js';
 
-export interface EventDetails {
+export interface ReferralProgramDetails {
   name: string;
   description: string;
-  date: string; // ISO date string
-  location?: string;
-  organizerName: string;
-  maxAttendees?: number;
+  endDate: string; // ISO date string
+  website?: string;
+  creatorName: string;
+  maxReferrals?: number;
 }
 
-export interface TokenMetadata {
+export interface ReferralTokenMetadata {
   name: string;
   symbol: string;
   description: string;
@@ -25,8 +25,8 @@ export interface TokenAttribute {
 }
 
 export interface MintFormData {
-  eventDetails: EventDetails;
-  tokenMetadata: TokenMetadata;
+  programDetails: ReferralProgramDetails;
+  tokenMetadata: ReferralTokenMetadata;
   supply: number;
   decimals: number;
 }
@@ -47,7 +47,7 @@ export interface RewardDetails {
 export interface ReferralProgramData {
   programDetails: ProgramDetails;
   rewardDetails: RewardDetails;
-  nftMetadata: TokenMetadata;
+  nftMetadata: ReferralTokenMetadata;
   supply: number;
   decimals: number;
 }
@@ -69,5 +69,5 @@ export interface UserTokenBalance {
   mint: PublicKey;
   amount: number;
   decimals: number;
-  tokenMetadata?: TokenMetadata;
+  tokenMetadata?: ReferralTokenMetadata;
 }

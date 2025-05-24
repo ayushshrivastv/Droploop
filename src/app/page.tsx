@@ -33,7 +33,7 @@ const QrIcon = () => (
   </svg>
 );
 
-const TokenIcon = () => (
+const ReferralIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="10"/>
     <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
@@ -71,9 +71,9 @@ const specItems = [
     description: 'Personalize referral NFTs with your brand identity and program details for a professional look.',
   },
   {
-    icon: <TokenIcon />,
+    icon: <ReferralIcon />,
     title: 'Program Metadata',
-    description: 'Attach detailed program information to referral NFTs, creating transparent reward structures.',
+    description: 'Attach detailed program information to referral rewards, creating transparent reward structures.',
   },
   {
     icon: (

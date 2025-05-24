@@ -1,8 +1,8 @@
-# Scalable cToken: Compressed Token Distribution Architecture
+# Droploop: Decentralized Referral System Architecture
 
 ## Overview
 
-Scalable cToken is a high-throughput solution for creating and distributing compressed proof-of-participation tokens at scale on the Solana blockchain. The system leverages Solana Pay for seamless QR code interactions and Light Protocol's ZK compression technology to achieve significant cost reductions and scalability improvements.
+Droploop is a decentralized referral program built on the Solana blockchain, leveraging Light Protocol's ZK compression technology. The system enables businesses and creators to generate, distribute, and track referral tokens with minimal costs and maximum efficiency. By using compressed tokens, Droploop achieves significant cost reductions and scalability improvements compared to traditional token-based referral systems.
 
 This document outlines the technical architecture, user workflows, and implementation details of the system.
 
@@ -11,94 +11,131 @@ This document outlines the technical architecture, user workflows, and implement
 ```
 ┌─────────────────────────────────────┐      ┌─────────────────────────────────┐
 │                                     │      │                                 │
-│   Frontend (Next.js + React)        │      │  Solana On-Chain Programs       │
+│   Frontend (Next.js + React)        │      │  Solana Blockchain              │
 │   ┌────────────────────────────┐    │      │  ┌─────────────────────────┐    │
 │   │                            │    │      │  │                         │    │
-│   │   Event Creator Interface  │    │      │  │  cToken Program         │    │
-│   │   - Create Events          │    │      │  │  - initialize_event     │    │
-│   │   - Mint cTokens           │────┼──────┼─▶│  - mint_batch_tokens    │    │
-│   │   - Generate QR Codes      │    │      │  │  - claim_token          │    │
-│   │   - Monitor Claims         │    │      │  │  - verify_token         │    │
+│   │   Creator Dashboard        │    │      │  │  Light Protocol         │    │
+│   │   - Create Referral Program│    │      │  │  - Compressed Tokens    │    │
+│   │   - Generate QR Codes      │────┼──────┼─▶│  - State Compression    │    │
+│   │   - Track Referrals        │    │      │  │  - Transfer Tokens      │    │
+│   │   - Monitor Analytics      │    │      │  │  - Verify Claims        │    │
 │   │                            │    │      │  │                         │    │
 │   └────────────────────────────┘    │      │  └─────────────┬───────────┘    │
 │                                     │      │                │                │
 │   ┌────────────────────────────┐    │      │  ┌─────────────▼───────────┐    │
 │   │                            │    │      │  │                         │    │
-│   │   Attendee Interface       │    │      │  │  Light Protocol         │    │
-│   │   - Scan QR Codes          │    │      │  │  - compressed_token     │    │
-│   │   - Claim cTokens          │────┼──────┼─▶│  - stateless.js         │    │
-│   │   - View Claimed Tokens    │    │      │  │  - state compression    │    │
-│   │                            │    │      │  │                         │    │
-│   └────────────────────────────┘    │      │  └─────────────┬───────────┘    │
-│                                     │      │                │                │
-│   ┌────────────────────────────┐    │      │  ┌─────────────▼───────────┐    │
-│   │                            │    │      │  │                         │    │
-│   │   Solana Pay Integration   │    │      │  │  Solana SPL Tokens      │    │
-│   │   - QR Code Generation     │────┼──────┼─▶│  - Token Program        │    │
-│   │   - Transaction Embedding  │    │      │  │  - Associated Token     │    │
-│   │   - Payment Processing     │    │      │  │    Account Program      │    │
+│   │   User Claim Interface     │    │      │  │  Solana Token Programs  │    │
+│   │   - Scan QR Codes          │    │      │  │  - SPL Token            │    │
+│   │   - Claim Referral Rewards  │────┼──────┼─▶│  - Associated Token    │    │
+│   │   - View Claimed Rewards    │    │      │  │    Account Program     │    │
 │   │                            │    │      │  │                         │    │
 │   └────────────────────────────┘    │      │  └─────────────────────────┘    │
 │                                     │      │                                 │
-└─────────────────────────────────────┘      │                                 │
-                                             └─────────────────────────────────┘
-┌─────────────────────────────────────┐
-│                                     │      ┌─────────────────────────────────┐
-│   Wallet Integration                │      │                                 │
-│   ┌────────────────────────────┐    │      │   ZK Compression               │
-│   │                            │    │      │   ┌─────────────────────────┐   │
-│   │   Solana Wallet Adapter    │    │      │   │                         │   │
-│   │   - Connect Wallet         │    │      │   │     Merkle Tree         │   │
-│   │   - Sign Transactions      │    │      │   │         │               │   │
-│   │   - View Balances          │    │      │   │     ┌───┴────┐           │   │
-│   │                            │    │      │   │     │        │           │   │
-│   └────────────────────────────┘    │      │   │  Event    Token         │   │
-│                                     │      │   │  State    Trees         │   │
+└─────────────────────────────────────┘      └─────────────────────────────────┘
+
+┌─────────────────────────────────────┐      ┌─────────────────────────────────┐
+│                                     │      │                                 │
+│   Wallet Integration                │      │   ZK Compression Technology     │
+│   ┌────────────────────────────┐    │      │   ┌─────────────────────────┐   │
+│   │                            │    │      │   │                         │   │
+│   │   Solana Wallet Adapter    │    │      │   │   State Trees           │   │
+│   │   - Connect Wallet         │    │      │   │   - Merkle Tree         │   │
+│   │   - Sign Transactions      │    │      │   │   - Zero-Knowledge      │   │
+│   │   - View Token Balances    │    │      │   │     Proofs              │   │
+│   │                            │    │      │   │                         │   │
+│   └────────────────────────────┘    │      │   │   1000x Cost Reduction  │   │
+│                                     │      │   │   500x Speed Increase   │   │
 └─────────────────────────────────────┘      │   │                         │   │
-                                             │   │   Compressed cTokens    │   │
-                                             │   │                         │   │
                                              │   └─────────────────────────┘   │
                                              │                                 │
                                              └─────────────────────────────────┘
 ```
 
-## Component Flow
+## Core Components
 
-### Event Creation Process
+### 1. Creator Dashboard
 
-1. **Organizer** logs into the application with a Solana wallet
-2. Organizer fills out event details (name, time, location, token supply) and submits creation form
-3. Client-side code sends transaction to initialize the event on-chain
-4. On-chain `initialize_event` function:
-   - Initializes event data
-   - Sets up token metadata structure
-   - Initializes compressed token state using Light Protocol
-   - Creates event authority account
-5. Event details are stored and displayed on dashboard
+The Creator Dashboard is the primary interface for businesses and creators to set up and manage their referral programs:
 
-### Token Minting Process
+- **Referral Program Creation**: Set up new referral programs with customizable parameters including token supply, reward amounts, and program duration
+- **QR Code Generation**: Create unique QR codes for each referral that can be shared with potential referrers
+- **Analytics Dashboard**: Track referral performance, claim rates, and program effectiveness
+- **Token Management**: Monitor and manage the distribution of compressed tokens
 
-1. **Organizer** selects an event and specifies token parameters
-2. Client-side code sends transaction to mint tokens on-chain
-3. On-chain `mint_batch_tokens` function:
-   - Creates compressed cTokens using Light Protocol
-   - Associates tokens with event metadata
-   - Allocates tokens for distribution via QR codes
-4. Event status is updated to show available tokens
+### 2. User Claim Interface
 
-### QR Code Generation Process
+The User Claim Interface allows users to claim referral rewards:
 
-1. **Organizer** requests to generate QR codes for an event
-2. Client-side code generates Solana Pay QR codes that encode:
-   - Event ID
+- **QR Code Scanner**: Scan referral QR codes to claim rewards
+- **Wallet Connection**: Connect Solana wallet to receive compressed tokens
+- **Reward History**: View history of claimed referral rewards
+
+### 3. Light Protocol Integration
+
+The system leverages Light Protocol's compression technology for efficient token operations:
+
+- **Compressed Tokens**: Create and transfer tokens at a fraction of the cost of standard SPL tokens
+- **State Compression**: Utilize ZK proofs to compress on-chain state
+- **Fallback Mechanism**: Gracefully degrade to standard token operations when Light Protocol methods are unavailable
+
+## Workflow Processes
+
+### Referral Program Creation
+
+1. **Creator** connects their Solana wallet to the application
+2. Creator fills out referral program details (name, description, reward amount, etc.)
+3. System creates a compressed token mint using Light Protocol
+4. Tokens are minted to the creator's wallet for distribution
+5. Program details and token information are stored and displayed on the dashboard
+
+### QR Code Generation
+
+1. **Creator** selects an existing referral program
+2. System generates unique QR codes containing:
+   - Referral program ID
    - Token claim instructions
-   - Verification parameters
-3. QR codes are rendered for display or download
-4. Organizer can distribute QR codes via print or digital means
+   - Creator's wallet address as the token source
+3. QR codes are rendered for display, download, or sharing
 
-### Token Claim Process
+### Referral Claim Process
 
-1. **Attendee** scans a Solana Pay QR code with their mobile device
+1. **User** scans a referral QR code with their device
+2. User is directed to the claim interface
+3. User connects their Solana wallet
+4. System verifies the referral code validity
+5. Compressed tokens are transferred from the creator's wallet to the user's wallet
+6. Transaction is recorded and analytics are updated
+
+## Technical Implementation
+
+### Frontend
+
+- **Framework**: Next.js 15 with App Router
+- **UI**: React with Tailwind CSS and Shadcn UI components
+- **State Management**: React Context API
+- **Wallet Integration**: Solana Wallet Adapter
+
+### Backend
+
+- **API Routes**: Next.js API routes for server-side operations
+- **Blockchain Interaction**: Web3.js and Light Protocol libraries
+- **Token Operations**: Light Protocol's compressed-token and stateless.js libraries
+
+### Blockchain
+
+- **Network**: Solana (Mainnet/Devnet)
+- **Token Standard**: Compressed tokens via Light Protocol
+- **Fallback**: Standard SPL tokens when Light Protocol is unavailable
+
+## Scalability and Cost Benefits
+
+Droploop's implementation of Light Protocol's compression technology offers significant advantages:
+
+- **Cost Reduction**: Up to 1000× lower transaction costs compared to standard token operations
+- **Throughput**: Ability to process hundreds of referrals in a single transaction
+- **Storage Efficiency**: 100× reduction in on-chain storage requirements
+
+These benefits make Droploop ideal for large-scale referral programs that would otherwise be cost-prohibitive on traditional blockchain systems.
 2. Their Solana wallet application launches and displays the transaction details
 3. Attendee confirms the transaction to claim the token
 4. On-chain `claim_token` function:
@@ -291,44 +328,44 @@ The application integrates with Solana Pay to create a seamless user experience:
 
 ## Future Extensions
 
-1. **Token Gating**: Enable event organizers to create token-gated experiences where only attendees with valid cTokens can access specific content or areas.
+1. **Tiered Referral Programs**: Enable businesses to create multi-level referral programs with different reward tiers for direct and indirect referrals.
 
-2. **Multi-Event Series**: Allow organizers to create series of connected events with progressive token collection and rewards for attending multiple events.
+2. **Custom Reward Structures**: Allow creators to define complex reward structures based on referral volume, user demographics, or other custom criteria.
 
-3. **Attendance Verification**: Add additional verification layers such as location-based verification or time-window restrictions.
+3. **Verification Mechanisms**: Add additional verification layers such as social proof verification or time-window restrictions for referral claims.
 
-4. **Token Utility Expansion**: Implement mechanisms for token holders to redeem benefits, discounts, or access to exclusive content.
+4. **Reward Utility Expansion**: Implement mechanisms for referral reward recipients to redeem benefits, discounts, or access to exclusive content.
 
-5. **Analytics Dashboard**: Develop comprehensive analytics for organizers to track attendee engagement and token distribution metrics.
+5. **Enhanced Analytics Dashboard**: Develop comprehensive analytics for businesses to track referral performance, conversion rates, and ROI metrics.
 
-6. **Cross-Chain Compatibility**: Expand the system to allow token claims across multiple blockchain networks.
+6. **Cross-Chain Compatibility**: Expand the system to allow referral rewards across multiple blockchain networks.
 
 ## Planned Backend Enhancements
 
-The current implementation focuses on delivering a functional and user-friendly cPOP interface. In the coming days, I plan to enhance the backend with the following improvements:
+The current implementation focuses on delivering a functional and user-friendly referral system interface. In the coming development phases, we plan to enhance the backend with the following improvements:
 
 ### Security Enhancements
 
-1. **Advanced Access Control**
-   - Role-based permissions for event management teams
-   - Multi-signature requirements for high-value token operations
-   - Rate limiting to prevent abuse of the token claiming system
+1. **Advanced Access Control**: Implement role-based access control for enterprise referral program management.
+   - Role-based permissions for business referral program management teams
+   - Multi-signature requirements for high-value referral reward operations
+   - Rate limiting to prevent abuse of the referral claiming system
 
 2. **Enhanced Transaction Security**
-   - Implement additional verification layers for token claims
+   - Implement additional verification layers for referral claims
    - Fraud detection system to identify suspicious claiming patterns
-   - Revocation mechanisms for compromised QR codes
+   - Revocation mechanisms for compromised referral QR codes
 
 3. **Data Protection**
-   - End-to-end encryption for sensitive event data
+   - End-to-end encryption for sensitive referral program data
    - Privacy-preserving analytics that maintain user anonymity
-   - Compliance with data protection regulations
+   - Compliance with data protection regulations (GDPR, CCPA)
 
 ### Testing and Quality Assurance
 
 1. **Comprehensive Test Suite**
    - Unit tests for all smart contract functions
-   - Integration tests for the entire token lifecycle
+   - Integration tests for the entire referral lifecycle
    - Load testing to verify performance at scale (10,000+ simultaneous users)
 
 2. **Security Audits**
@@ -337,25 +374,25 @@ The current implementation focuses on delivering a functional and user-friendly 
    - Formal verification of critical contract functions
 
 3. **Performance Optimization**
-   - Benchmarking and optimization of token minting operations
-   - Caching strategies for frequently accessed data
+   - Benchmarking and optimization of compressed token operations
+   - Caching strategies for frequently accessed referral data
    - Gas optimization for all on-chain operations
 
 ### Feature Expansion
 
-1. **Advanced Token Functionality**
-   - Tiered token systems for different attendee categories
-   - Time-locked tokens that activate at specific event milestones
-   - Token upgradeability for returning attendees
+1. **Advanced Referral Functionality**
+   - Multi-level referral tracking for network marketing models
+   - Time-limited referral campaigns with automatic expiration
+   - Customizable reward distribution for different user segments
 
 2. **Integration Ecosystem**
-   - API endpoints for third-party event management platforms
-   - Webhook support for real-time notifications
-   - SDK for developers to build on top of the cToken infrastructure
+   - API endpoints for third-party marketing platforms
+   - Webhook support for real-time referral notifications
+   - SDK for developers to build on top of the Droploop infrastructure
 
-3. **Community Governance**
-   - Decentralized governance for protocol upgrades
-   - Community-driven feature prioritization
-   - Open-source contribution framework
+3. **Community and Business Tools**
+   - Dashboard for businesses to track referral performance
+   - A/B testing tools for optimizing referral campaigns
+   - Template library for quick referral program deployment
 
-These enhancements will further strengthen the platform's security, reliability, and scalability while maintaining the intuitive user experience that makes the current implementation accessible to both event organizers and attendees.
+These enhancements will further strengthen the platform's security, reliability, and scalability while maintaining the intuitive user experience that makes Droploop accessible to both businesses and users in the referral ecosystem.

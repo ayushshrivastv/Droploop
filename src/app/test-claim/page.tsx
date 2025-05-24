@@ -10,8 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { createSolanaPayClaimUrl } from '@/lib/utils/qrcode';
-import QRCode from 'qrcode.react';
-import { ClaimForm } from '@/components/claim/new-claim-form';
+import { QRCodeSVG } from 'qrcode.react';
+import { ClaimForm } from '@/components/claim/referral-claim-form';
 
 export default function TestClaimPage() {
   const { publicKey } = useWallet();
@@ -132,7 +132,7 @@ export default function TestClaimPage() {
 
                     <div className="flex justify-center mb-4">
                       <div className="bg-white p-2 rounded-md">
-                        <QRCode value={solanaPayUrl} size={150} />
+                        <QRCodeSVG value={solanaPayUrl} size={150} />
                       </div>
                     </div>
 

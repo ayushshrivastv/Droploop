@@ -1,16 +1,16 @@
-# Scalable cToken Troubleshooting Guide
+# Droploop Troubleshooting Guide
 
-This guide provides a comprehensive approach to troubleshooting token creation issues in the Scalable cToken application, which uses Light Protocol for compressed token operations on Solana.
+This guide provides a comprehensive approach to troubleshooting referral program creation issues in the Droploop application, which uses Light Protocol for compressed token operations on Solana.
 
 ## Quick Start
 
-If you're experiencing token creation failures, run these scripts in order:
+If you're experiencing referral program creation failures, run these scripts in order:
 
 ```bash
 # 1. Apply all fixes automatically (recommended)
 node scripts/fix-token-creation.js
 
-# 2. Test token creation directly
+# 2. Test referral token creation directly
 node scripts/test-token-creation.js
 
 # 3. Start the application with the fixes applied

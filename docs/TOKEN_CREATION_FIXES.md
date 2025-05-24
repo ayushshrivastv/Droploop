@@ -1,6 +1,6 @@
-# Token Creation Fixes
+# Referral Program Creation Fixes
 
-This document details the comprehensive fixes applied to resolve token creation issues with Light Protocol compressed tokens.
+This document details the comprehensive fixes applied to resolve referral program creation issues with Light Protocol compressed tokens.
 
 ## Issues Addressed
 
@@ -12,7 +12,7 @@ This document details the comprehensive fixes applied to resolve token creation 
 - Improved the admin private key storage format in the `.env` file
 - Added support for both base64 and comma-separated formats for backward compatibility
 - Enhanced validation to verify the keypair is properly formatted before use
-- Set the admin keypair as the mint authority when creating tokens
+- Set the admin keypair as the mint authority when creating referral tokens
 
 ### 2. Insufficient Funds for Rent
 

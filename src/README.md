@@ -1,16 +1,16 @@
-# Scalable cToken - Technical Documentation
+# Droploop - Technical Documentation
 
 ## Project Architecture
 
-This project is built using Next.js 15 with the App Router architecture, React 18, and integrates with Solana blockchain via wallet adapters and Light Protocol for compressed token functionality.
+This project is built using Next.js 15 with the App Router architecture, React 18, and integrates with Solana blockchain via wallet adapters and Light Protocol for compressed token functionality to power the referral system.
 
 ## Directory Structure
 
 ```
 src/
 ├── app/                  # Next.js App Router pages
-│   ├── claim/            # Token claiming page
-│   ├── mint/             # Token creation page
+│   ├── claim/            # Referral reward claiming page
+│   ├── mint/             # Referral program creation page
 │   ├── profile/          # User profile page
 │   ├── globals.css       # Global styles
 │   ├── layout.tsx        # Root layout with providers
@@ -18,7 +18,7 @@ src/
 ├── components/           # React components
 │   ├── claim/            # Claim-related components
 │   ├── layouts/          # Layout components
-│   ├── mint/             # Mint-related components
+│   ├── mint/             # Referral program creation components
 │   ├── providers/        # Context providers
 │   ├── shared/           # Shared components (header, footer)
 │   └── ui/               # UI components (buttons, forms, etc.)
@@ -31,23 +31,23 @@ src/
 
 ## Core Functionality
 
-### Token Creation (Mint)
+### Referral Program Creation
 
-The token creation flow uses Light Protocol's compressed token standard to create cost-effective tokens on Solana:
+The referral program creation flow uses Light Protocol's compressed token standard to create cost-effective referral tokens on Solana:
 
-1. User connects their Solana wallet via the wallet adapter
-2. User fills out event details in the mint form
-3. Application creates a compressed token using Light Protocol's SDK
-4. QR codes are generated for token distribution using Solana Pay URLs
+1. Business/creator connects their Solana wallet via the wallet adapter
+2. Creator fills out referral program details in the creation form
+3. Application creates compressed referral tokens using Light Protocol's SDK
+4. QR codes are generated for referral distribution using Solana Pay URLs
 
-### Token Claiming
+### Referral Reward Claiming
 
-The token claiming process works as follows:
+The referral claiming process works as follows:
 
-1. Attendee scans a QR code or enters a claim code
-2. Application validates the code against the blockchain
-3. User connects their wallet to receive the token
-4. Token is transferred to the user's wallet using compressed token transfer functions
+1. User scans a referral QR code or enters a referral code
+2. Application validates the referral code against the blockchain
+3. User connects their wallet to receive the referral reward
+4. Referral token is transferred to the user's wallet using compressed token transfer functions
 
 ## Technical Implementation Details
 
@@ -74,19 +74,19 @@ The UI is built with:
 
 ## Scalability Highlights
 
-- **Massive Throughput**: Capable of supporting events with 10,000+ attendees through Light Protocol's compressed NFTs
-- **Cost Efficiency**: 99.9% reduction in storage costs compared to traditional NFTs (approximately 0.000005 SOL per token vs 0.005 SOL)
+- **Massive Throughput**: Capable of supporting referral programs with 10,000+ participants through Light Protocol's compressed tokens
+- **Cost Efficiency**: 99.9% reduction in transaction costs compared to traditional tokens (approximately 0.000005 SOL per referral vs 0.005 SOL)
 - **Network Efficiency**: Reduces on-chain storage requirements by up to 1000x while maintaining full L1 security guarantees
-- **Batch Processing**: Optimized for high-volume token issuance with minimal network congestion
+- **Batch Processing**: Optimized for high-volume referral processing with minimal network congestion
 
 ### Compression Technology
 
-At the core of our solution is Light Protocol's t compression technology:
+At the core of our solution is Light Protocol's compression technology:
 
 - **Zero-Knowledge Proofs**: Enables efficient on-chain storage while preserving cryptographic verification
-- **Merkle Tree Implementation**: Organizes token data in compressed Merkle trees, allowing thousands of tokens to be represented by a single on-chain commitment
-- **Concurrent Minting**: Supports parallel token issuance without chain congestion
-- **Verifiable Ownership**: Despite compression, tokens maintain full verifiability and composability with other Solana protocols
+- **Merkle Tree Implementation**: Organizes referral token data in compressed Merkle trees, allowing thousands of referrals to be represented by a single on-chain commitment
+- **Concurrent Processing**: Supports parallel referral reward distribution without chain congestion
+- **Verifiable Ownership**: Despite compression, referral rewards maintain full verifiability and composability with other Solana protocols
 
 ### Performance Optimizations
 

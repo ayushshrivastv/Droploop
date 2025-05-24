@@ -1,15 +1,55 @@
 "use client";
 
+import { useState } from 'react';
 import { AppleLayout } from '@/components/layouts/apple-layout';
 import { ROUTES } from '@/lib/constants';
 import { EventStatistics } from '@/components/dashboard/event-statistics';
 import { RecipientList } from '@/components/dashboard/recipient-list';
 import { ClaimAnalytics } from '@/components/dashboard/claim-analytics';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { X } from 'lucide-react';
 
 export default function DashboardPage() {
+  // State to track if the development banner is visible
+  const [showDevBanner, setShowDevBanner] = useState(true);
+  
   return (
     <AppleLayout>
+      {/* Development Banner with padding from top */}
+      <div className="pt-6"></div>
+      {showDevBanner && (
+        <div className="container mx-auto mb-6">
+          <div className="w-full bg-white border border-blue-200 rounded-md shadow-sm overflow-hidden">
+            <div className="px-4 py-4 flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="text-blue-500 mr-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">This page is under development</p>
+                  <p className="text-sm text-gray-700 mt-1">
+                    The ZK Compression functionality is currently being implemented. Please check the <a href="https://docs.lightprotocol.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">ZK Compression documentation</a> to understand how compressed NFTs work. Light Protocol integration allows your application to seamlessly create and manage compressed tokens on Solana.
+                  </p>
+                </div>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+                onClick={() => setShowDevBanner(false)}
+              >
+                <X className="h-5 w-5" />
+                <span className="sr-only">Dismiss</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Content */}
       <div className="container mx-auto pt-4 pb-16 flex-1">
         <h1 className="text-3xl font-bold mb-8">Event Dashboard</h1>
