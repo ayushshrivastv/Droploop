@@ -1,4 +1,7 @@
-import { useState } from 'react';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useWallet } from '@solana/wallet-adapter-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -10,6 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
  * which is required for compressed token operations.
  */
 export function StateTreeSetup() {
+  const [isMounted, setIsMounted] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
   const [result, setResult] = useState<{
     success: boolean;
@@ -17,6 +21,11 @@ export function StateTreeSetup() {
     treePublicKey?: string;
     signature?: string;
   } | null>(null);
+  
+  // Ensure component is only rendered on client-side
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const initializeStateTree = async () => {
     try {
@@ -55,6 +64,20 @@ export function StateTreeSetup() {
     }
   };
 
+  // Only render the full component on the client side
+  if (!isMounted) {
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Loading...</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">Initializing admin interface...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+  
   return (
     <Card className="w-full">
       <CardHeader>

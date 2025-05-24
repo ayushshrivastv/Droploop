@@ -1,19 +1,45 @@
 'use client';
 
-import { useWallet } from '@solana/wallet-adapter-react';
-import { StateTreeSetup } from '@/components/admin/state-tree-setup';
+import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/lib/constants';
 import Link from 'next/link';
 
+// Dynamically import components that use wallet to prevent SSR issues
+const StateTreeSetup = dynamic(
+  () => import('@/components/admin/state-tree-setup').then(mod => mod.StateTreeSetup),
+  { ssr: false }
+);
+
 /**
  * Admin page for managing the application
  * Provides access to administrative functions like initializing state trees
  */
 export default function AdminPage() {
-  const { publicKey, connected } = useWallet();
+  // Client-side only state
+  const [isMounted, setIsMounted] = useState(false);
+  const [connected, setConnected] = useState(false);
+  
+  // Only run on client-side
+  useEffect(() => {
+    setIsMounted(true);
+    // Check if wallet is connected - this could be expanded with actual wallet check
+    // when the component is mounted
+    const checkWalletConnection = async () => {
+      try {
+        // For now just a placeholder - you would use actual wallet connection check here
+        setConnected(false);
+      } catch (error) {
+        console.error('Error checking wallet connection:', error);
+        setConnected(false);
+      }
+    };
+    
+    checkWalletConnection();
+  }, []);
 
   return (
     <div className="container max-w-4xl py-8 space-y-6">
@@ -45,9 +71,9 @@ export default function AdminPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Link href={ROUTES.CREATE_TOKEN} passHref>
+              <Link href={ROUTES.CREATE_PROGRAM} passHref>
                 <Button variant="outline" className="w-full">
-                  Create New Token
+                  Create New Referral Program
                 </Button>
               </Link>
               <Link href={ROUTES.HOME} passHref>

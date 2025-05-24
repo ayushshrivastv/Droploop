@@ -67,9 +67,6 @@ The user interface is built to be intuitive across devices and accommodates both
 ### Seamless Connection of Wallet to Collect Event Tokens.
 <img src="https://github.com/user-attachments/assets/f0b7ff0c-ba67-4a91-aaf8-337878154d63" style="width: 300px;">
 
-
-
-
 <img src="https://github.com/user-attachments/assets/5ecbbd21-bd21-4201-bb57-2dbc219473d1" alt="Screenshot 2025-05-18 at 12 35 43 AM" width="300"/>
 
 ## QR Codes & Reward Distribution
